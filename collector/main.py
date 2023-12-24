@@ -57,10 +57,10 @@ async def one_ticker(tic_name, start, end):
             dbh.save_dict_to_table_temp(data, 'history.stock_shares_securities_history_2023')
         df = pd.DataFrame(data)
         df.set_index('TRADEDATE', inplace=True)
-        print(df.head(), '\n')
-        print(df.tail(), '\n')
-        df.info()
-        print(len(df))
+        print(df.head(3), '\n')
+        print(df.tail(3), '\n')
+        # df.info()
+        # print(len(df))
         print(len(data))
         # print(data)
 
@@ -126,6 +126,7 @@ def get_history_till_20231214():
 
     i = 0
     for ticker in tickers_list:
+        i += 1
         print(f'processing {i} of {len(tickers_list)}, ticker: {ticker}')
         asyncio.run(one_ticker(ticker, start='2023-01-01', end='2023-12-14'))
         time.sleep(15)
