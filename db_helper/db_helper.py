@@ -70,3 +70,40 @@ def save_dict_to_table(data, str_table):
             lgr.logger.info('Database connection closed.')
             if st.DEBUG_MODE:
                 print('Database connection closed.')
+
+
+def save_dict_to_table_temp(data, str_table):
+    conn = None
+    try:
+        params = st.DB_PARAMS
+
+        lgr.logger.info('Connecting to the PostgreSQL database...')
+        if st.DEBUG_MODE:
+            print('Connecting to the PostgreSQL database...')
+
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+
+        lgr.logger.info(f'Storing {len(data)} records to table {str_table}')
+        if st.DEBUG_MODE:
+            print(f'Storing {len(data)} records to table {str_table}')
+
+        columns = data[0].keys()
+        query = ("INSERT INTO " + str_table + " ({}) VALUES %s"
+                 .format(','.join(columns)))
+        values = [[value for value in item.values()] for item in data]
+        execute_values(cur, query, values)
+        conn.commit()
+
+        # close the communication with the PostgreSQL
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        lgr.logger.error(f'Error: {error}')
+        if st.DEBUG_MODE:
+            print(f'Error: {error}')
+    finally:
+        if conn is not None:
+            conn.close()
+            lgr.logger.info('Database connection closed.')
+            if st.DEBUG_MODE:
+                print('Database connection closed.')

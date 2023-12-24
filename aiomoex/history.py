@@ -117,7 +117,8 @@ async def get_board_history(
     start: Optional[str] = None,
     end: Optional[str] = None,
     columns: Optional[Iterable[str]] = ("BOARDID", "TRADEDATE", "CLOSE", "VOLUME", "VALUE"),
-    board: str = DEFAULT_BOARD,
+    board: Optional[str] = None,
+    # board: str = DEFAULT_BOARD,
     market: str = DEFAULT_MARKET,
     engine: str = DEFAULT_ENGINE,
 ) -> client.Table:
