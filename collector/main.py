@@ -54,7 +54,7 @@ async def one_ticker(tic_name, start, end):
     async with aiohttp.ClientSession() as session:
         data = await aiomoex.get_board_history(session, tic_name, start, end, columns=columns)  # 'SNGSP' tic_name
         if len(data) > 0:
-            dbh.save_dict_to_table_temp(data, 'history.stock_shares_securities_history_2020_2022')
+            dbh.save_dict_to_table_temp(data, 'history.stock_shares_securities_history_2010_2019')
         # df = pd.DataFrame(data)
         # df.set_index('TRADEDATE', inplace=True)
         # print(df.head(3), '\n')
@@ -128,7 +128,7 @@ def get_history_till_20231214():
     for ticker in tickers_list:
         i += 1
         print(f'processing {i} of {len(tickers_list)}, ticker: {ticker}')
-        asyncio.run(one_ticker(ticker, start='2020-01-01', end='2022-12-31'))
+        asyncio.run(one_ticker(ticker, start='2010-01-01', end='2019-12-31'))
         time.sleep(15)
 
 
