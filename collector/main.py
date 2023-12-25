@@ -33,7 +33,7 @@ async def one_ticker_ex():
                "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
                "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
     async with aiohttp.ClientSession() as session:
-        data = await h_ex.get_board_history_ex(session, columns=columns)  # 'SNGSP' tic_name , start='2023-12-10', end='2023-12-10'
+        data = await h_ex.get_board_history_ex(session, columns=columns)
         # print(type(data))
         if len(data) > 0:
             dbh.save_dict_to_table(data, 'history.stock_shares_tqbr_securities_history')
@@ -137,9 +137,9 @@ if __name__ == "__main__":
     if st.DEBUG_MODE:
         print("Routine started")
     # asyncio.run(all_tickers())
-    # asyncio.run(one_ticker_ex())
+    asyncio.run(one_ticker_ex())
     # asyncio.run(one_ticker('SVCB', start='2023-01-01', end='2023-12-14'))
-    get_history_till_20231214()
+    # get_history_till_20231214()
     # print(os.getcwd())
     # for i in sys.path:
     #     print(i)
