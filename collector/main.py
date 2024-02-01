@@ -5,7 +5,7 @@ import pandas as pd
 import sys
 sys.path.append('/home/greg/proj/moex/moex_operator')
 sys.path.append('/home/greg/proj/moex/moex_operator/collector')
-sys.path.append('/home/greg/.virtualenvs/moex_operator_env/lib/python3.8/site-packages')
+sys.path.append('/home/greg/.virtualenvs/moex_operator_env/lib/python3.10/site-packages')
 sys.path.append('/home/greg/proj/moex/moex_operator/aiomoex')
 
 import aiomoex
