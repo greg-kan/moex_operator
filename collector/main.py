@@ -12,7 +12,10 @@ import aiomoex
 import history_ex as h_ex
 import db_helper as dbh
 import settings as st
-import logger as lgr
+from logger import Logger
+
+
+logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
 # https://iss.moex.com/iss/history/engines/stock/markets/shares/securities/SBER?marketprice_board=1
 # https://iss.moex.com/iss/history/engines/stock/markets/shares/securities.xml
@@ -61,7 +64,7 @@ async def one_ticker(tic_name, start, end):
         # print(df.tail(3), '\n')
         # df.info()
         # print(len(df))
-        print(len(data))
+        # print(len(data))
         # print(data)
 
 
@@ -133,9 +136,8 @@ def get_history_till_20231214():
 
 
 if __name__ == "__main__":
-    lgr.logger.info("Routine started")
-    if st.DEBUG_MODE:
-        print("Routine started")
+    logger.info("Routine started")
+
     # asyncio.run(all_tickers())
     asyncio.run(one_ticker_ex())
     # asyncio.run(one_ticker('SVCB', start='2023-01-01', end='2023-12-14'))
@@ -143,8 +145,5 @@ if __name__ == "__main__":
     # print(os.getcwd())
     # for i in sys.path:
     #     print(i)
-    lgr.logger.info("Routine finished")
-    if st.DEBUG_MODE:
-        print("Routine finished")
-
+    logger.info("Routine finished")
 
