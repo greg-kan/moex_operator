@@ -39,7 +39,7 @@ async def one_ticker_ex():
         data = await h_ex.get_board_history_ex(session, columns=columns)
         # print(type(data))
         if len(data) > 0:
-            dbh.save_dict_to_table(data, 'history.stock_shares_tqbr_securities_history')
+            dbh.save_dict_to_table(data, 'history.stock_shares_securities_history')
         # df = pd.DataFrame(data)
         # df.set_index('TRADEDATE', inplace=True)
         # print(df.head(), '\n')
