@@ -55,9 +55,9 @@ async def one_ticker(tic_name, start, end):
                "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
                "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
     async with aiohttp.ClientSession() as session:
-        data = await aiomoex.get_board_history(session, tic_name, start, end, columns=columns)  # 'SNGSP' tic_name
+        data = await aiomoex.get_board_history(session, tic_name, start, end, columns=columns, board=None)  # 'SNGSP' tic_name
         if len(data) > 0:
-            dbh.save_dict_to_table_temp(data, 'history.stock_shares_securities_history_2010_2019')
+            dbh.save_dict_to_table_temp(data, 'history.stock_shares_securities_history_2023_2023')
         # df = pd.DataFrame(data)
         # df.set_index('TRADEDATE', inplace=True)
         # print(df.head(3), '\n')
@@ -127,12 +127,14 @@ def get_history_till_20231214():
     'VJGZP', 'VKCO', 'VLHZ', 'VRSB', 'VRSBP', 'VSMO', 'VSYD', 'VSYDP', 'VTBR', 'WTCM', 'WTCMP', 'WUSH', 'YAKG', 'YKEN',
     'YKENP', 'YNDX', 'YRSB', 'YRSBP', 'YUAN', 'ZILL', 'ZVEZ']
 
+    tickers_list = ['SBER', 'SBERP', 'SBGB', 'SBGD', 'SBHI', 'SBMM']
+
     i = 0
     for ticker in tickers_list:
         i += 1
         print(f'processing {i} of {len(tickers_list)}, ticker: {ticker}')
-        asyncio.run(one_ticker(ticker, start='2010-01-01', end='2019-12-31'))
-        time.sleep(15)
+        asyncio.run(one_ticker(ticker, start='2023-12-13', end='2023-12-13'))
+        time.sleep(10)
 
 
 if __name__ == "__main__":
