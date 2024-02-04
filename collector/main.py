@@ -2,6 +2,7 @@ import time
 import asyncio
 import aiohttp
 import pandas as pd
+import os
 import sys
 sys.path.append('/home/greg/proj/moex/moex_operator')
 sys.path.append('/home/greg/proj/moex/moex_operator/collector')
@@ -30,23 +31,15 @@ logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 # https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/SBER.json?from=2023-12-01&till=2023-12-15
 
 
-async def one_ticker_ex():
+async def all_shares_on_last_date():
     columns = ("BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES", "VALUE", "OPEN", "LOW", "HIGH",
                "LEGALCLOSEPRICE", "WAPRICE", "CLOSE", "VOLUME", "MARKETPRICE2", "MARKETPRICE3",
                "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
                "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
     async with aiohttp.ClientSession() as session:
-        data = await h_ex.get_board_history_ex(session, columns=columns)
-        # print(type(data))
+        data = await h_ex.get_board_history_ex(session, columns=columns, board=None)
         if len(data) > 0:
             dbh.save_dict_to_table(data, 'history.stock_shares_securities_history')
-        # df = pd.DataFrame(data)
-        # df.set_index('TRADEDATE', inplace=True)
-        # print(df.head(), '\n')
-        # print(df.tail(), '\n')
-        # df.info()
-        # print(len(df))
-        # print(df[df['SECID'] == 'SBER'])
 
 
 async def one_ticker(tic_name, start, end):
@@ -55,7 +48,7 @@ async def one_ticker(tic_name, start, end):
                "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
                "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
     async with aiohttp.ClientSession() as session:
-        data = await aiomoex.get_board_history(session, tic_name, start, end, columns=columns, board=None)  # 'SNGSP' tic_name
+        data = await aiomoex.get_board_history(session, tic_name, start, end, columns=columns, board=None)
         if len(data) > 0:
             dbh.save_dict_to_table_temp(data, 'history.stock_shares_securities_history_2023_2023')
         # df = pd.DataFrame(data)
@@ -66,11 +59,12 @@ async def one_ticker(tic_name, start, end):
         # print(len(df))
         # print(len(data))
         # print(data)
+        # print(df[df['SECID'] == 'SBER'])
 
 
-async def all_tickers():
+async def test_request():
     # https://iss.moex.com/iss/history/engines/stock/markets/shares/securities/SBER?marketprice_board=1
-    request_url = "https://iss.moex.com/iss/engines/stock/" "markets/shares/boards/TQBR/securities.json"
+    request_url = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json"
     arguments = {"securities.columns": ("SECID," "REGNUMBER," "LOTSIZE," "SHORTNAME")}
 
     async with aiohttp.ClientSession() as session:
@@ -140,12 +134,21 @@ def get_history_till_20231214():
 if __name__ == "__main__":
     logger.info("Routine started")
 
-    # asyncio.run(all_tickers())
-    asyncio.run(one_ticker_ex())
+    # for requests testing
+    # asyncio.run(test_request())
+
+    # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
+    asyncio.run(all_shares_on_last_date())
+
+    # get history of one ticker for a dates range and store to table
     # asyncio.run(one_ticker('SVCB', start='2023-01-01', end='2023-12-14'))
-    # get_history_till_20231214()
-    # print(os.getcwd())
-    # for i in sys.path:
+
+    # get_history_till_20231214()  # get history of tickers in a loop for a dates range and store to table
+
+    # print(os.getcwd())  # returns the current working directory
+
+    # for i in sys.path:    # returns sys path strings
     #     print(i)
+
     logger.info("Routine finished")
 

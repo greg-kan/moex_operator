@@ -37,26 +37,21 @@ def make_url_ex(
 async def get_board_history_ex(
     session: aiohttp.ClientSession,
     security: str = '',
-    start: Optional[str] = None,
-    end: Optional[str] = None,
-    columns: Optional[Iterable[str]] = ("BOARDID", "TRADEDATE", "CLOSE", "VOLUME", "VALUE"),  # , "SECID"
-    # board: str = DEFAULT_BOARD,
-    board: Optional[str] = None,
+    columns: Optional[Iterable[str]] = ("BOARDID", "TRADEDATE", "CLOSE", "VOLUME", "VALUE"),
+    board: str | None = DEFAULT_BOARD,
     market: str = DEFAULT_MARKET,
     engine: str = DEFAULT_ENGINE,
 ) -> client.Table:
-    """Получить историю торгов для указанной бумаги в указанном режиме торгов за указанный интервал дат.
+    """Получить историю торгов для всех бумаг в указанном режиме торгов за последнюю дату.
 
-    Описание запроса - https://iss.moex.com/iss/reference/65
+    Описание запроса - https://iss.moex.com/iss/reference/65 - ЭТО НЕ ТОЧНО
+
+    TODO: Нужно разобраться с этой get_board_history_ex и make_url_ex, можно ли воспользоваться встроенными...
 
     :param session:
         Сессия http соединения.
     :param security:
         Тикер ценной бумаги.
-    :param start:
-        Дата вида ГГГГ-ММ-ДД. При отсутствии данные будут загружены с начала истории.
-    :param end:
-        Дата вида ГГГГ-ММ-ДД. При отсутствии данные будут загружены до конца истории.
     :param columns:
         Кортеж столбцов, которые нужно загрузить - по умолчанию режим торгов, дата торгов, цена закрытия
         и объем в штуках и стоимости. Если пустой или None, то загружаются все столбцы.
@@ -68,11 +63,12 @@ async def get_board_history_ex(
         Движок - по умолчанию акции.
 
     :return:
+        НУЖНО УТОЧНИТЬ И ИСПРАВИТЬ
         Список словарей, которые напрямую конвертируется в pandas.DataFrame.
     """
     url = make_url_ex(
         history=True, engine=engine, market=market, board=board, security=security,
     )
     table = "history"
-    query = request_helpers.make_query(start=start, end=end, table=table, columns=columns)
+    query = request_helpers.make_query(table=table, columns=columns)
     return await request_helpers.get_long_data(session, url, table, query)
