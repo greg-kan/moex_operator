@@ -9,12 +9,11 @@ from aiomoex.request_helpers import DEFAULT_BOARD, DEFAULT_ENGINE, DEFAULT_MARKE
 
 def make_url_ex(
     *,
-    history: Optional[bool] = None,
-    engine: Optional[str] = None,
-    market: Optional[str] = None,
-    board: Optional[str] = None,
-    security: Optional[str] = None,
-    ending: Optional[str] = None,
+    history: bool | None = None,
+    engine: str | None = None,
+    market: str | None = None,
+    board: str | None = None,
+    ending: str | None = None,
 ) -> str:
     """Формирует URL для запроса."""
     url_parts = ["https://iss.moex.com/iss"]
@@ -26,7 +25,6 @@ def make_url_ex(
         url_parts.append(f"/markets/{market}")
     if board:
         url_parts.append(f"/boards/{board}")
-    # if security:
     url_parts.append(f"/securities")
     if ending:
         url_parts.append(f"/{ending}")
@@ -34,9 +32,8 @@ def make_url_ex(
     return "".join(url_parts)
 
 
-async def get_board_history_ex(
+async def get_board_history_all_securities_on_last_date(
     session: aiohttp.ClientSession,
-    security: str = '',
     columns: Optional[Iterable[str]] = ("BOARDID", "TRADEDATE", "CLOSE", "VOLUME", "VALUE"),
     board: str | None = DEFAULT_BOARD,
     market: str = DEFAULT_MARKET,
@@ -44,14 +41,10 @@ async def get_board_history_ex(
 ) -> client.Table:
     """Получить историю торгов для всех бумаг в указанном режиме торгов за последнюю дату.
 
-    Описание запроса - https://iss.moex.com/iss/reference/65 - ЭТО НЕ ТОЧНО
-
-    TODO: Нужно разобраться с этой get_board_history_ex и make_url_ex, можно ли воспользоваться встроенными...
+    Описание запроса - https://iss.moex.com/iss/reference/65 - TODO:ЭТО НЕ ТОЧНО
 
     :param session:
         Сессия http соединения.
-    :param security:
-        Тикер ценной бумаги.
     :param columns:
         Кортеж столбцов, которые нужно загрузить - по умолчанию режим торгов, дата торгов, цена закрытия
         и объем в штуках и стоимости. Если пустой или None, то загружаются все столбцы.
@@ -63,12 +56,15 @@ async def get_board_history_ex(
         Движок - по умолчанию акции.
 
     :return:
-        НУЖНО УТОЧНИТЬ И ИСПРАВИТЬ
         Список словарей, которые напрямую конвертируется в pandas.DataFrame.
     """
     url = make_url_ex(
-        history=True, engine=engine, market=market, board=board, security=security,
+        history=True,
+        engine=engine,
+        market=market,
+        board=board,
     )
+
     table = "history"
     query = request_helpers.make_query(table=table, columns=columns)
     return await request_helpers.get_long_data(session, url, table, query)

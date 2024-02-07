@@ -37,7 +37,7 @@ async def all_shares_on_last_date():
                "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
                "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
     async with aiohttp.ClientSession() as session:
-        data = await h_ex.get_board_history_ex(session, columns=columns, board=None)
+        data = await h_ex.get_board_history_all_securities_on_last_date(session, columns=columns, board=None)
         if len(data) > 0:
             dbh.save_dict_to_table(data, 'history.stock_shares_securities_history')
 
