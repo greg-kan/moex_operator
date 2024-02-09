@@ -2,7 +2,6 @@ import time
 import asyncio
 import aiohttp
 import pandas as pd
-import os
 import sys
 sys.path.append('/home/greg/proj/moex/moex_operator')
 sys.path.append('/home/greg/proj/moex/moex_operator/collector')
@@ -10,6 +9,7 @@ sys.path.append('/home/greg/.virtualenvs/moex_operator_env/lib/python3.10/site-p
 sys.path.append('/home/greg/proj/moex/moex_operator/aiomoex')
 
 import aiomoex
+from aiomoex import request_helpers as rh
 import history_ex as h_ex
 import db_helper as dbh
 import settings as st
@@ -18,64 +18,44 @@ from logger import Logger
 
 logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
-# https://iss.moex.com/iss/history/engines/stock/markets/shares/securities/SBER?marketprice_board=1
-# https://iss.moex.com/iss/history/engines/stock/markets/shares/securities.xml
-# https://iss.moex.com/iss/history/engines/stock/markets/index/securities.xml?date=2023-12-11
-# https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities.xml?date=2023-12-13
-# one date despite two in parameters:
-# https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities.json?from=2023-12-14&till=2023-12-15&iss.only=history,history.cursor&history.columns=BOARDID,SECID,TRADEDATE,CLOSE,VOLUME,VALUE&iss.json=extended&iss.meta=off
-# data range but one security:
-# https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/SBER.json?from=2023-12-14&till=2023-12-15&iss.only=history,history.cursor&history.columns=BOARDID,SECID,TRADEDATE,CLOSE,VOLUME,VALUE&iss.json=extended&iss.meta=off
 
-# SBER 2023-12-01 - 2023-12-15
-# https://iss.moex.com/iss/history/engines/stock/markets/shares/boards/TQBR/securities/SBER.json?from=2023-12-01&till=2023-12-15
-
-
-async def all_shares_on_last_date():
+async def all_shares_all_boards_history_market_on_last_date():
     columns = ("BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES", "VALUE", "OPEN", "LOW", "HIGH",
                "LEGALCLOSEPRICE", "WAPRICE", "CLOSE", "VOLUME", "MARKETPRICE2", "MARKETPRICE3",
                "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
                "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
     async with aiohttp.ClientSession() as session:
-        data = await h_ex.get_board_history_all_securities_on_last_date(session, columns=columns, board=None)
+        data = await h_ex.get_history_all_securities_on_last_date(session,
+                                                                  columns=columns,
+                                                                  board=None)
         if len(data) > 0:
-            dbh.save_dict_to_table(data, 'history.stock_shares_securities_history')
+            dbh.save_data_for_last_date(data, 'history.stock_shares_securities_history', 'TRADEDATE')
 
 
-async def one_ticker(tic_name, start, end):
-    columns = ("BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES", "VALUE", "OPEN", "LOW", "HIGH",
-               "LEGALCLOSEPRICE", "WAPRICE", "CLOSE", "VOLUME", "MARKETPRICE2", "MARKETPRICE3",
-               "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
-               "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
+async def all_shares_all_boards_list_on_current_date():
+    columns = ("SECID", "BOARDID", "SHORTNAME", "PREVPRICE", "LOTSIZE", "FACEVALUE", "STATUS",
+               "BOARDNAME", "DECIMALS", "SECNAME", "REMARKS", "MARKETCODE", "INSTRID", "SECTORID", "MINSTEP",
+               "PREVWAPRICE", "FACEUNIT", "PREVDATE", "ISSUESIZE", "ISIN", "LATNAME", "REGNUMBER", "PREVLEGALCLOSEPRICE",
+               "CURRENCYID", "SECTYPE", "LISTLEVEL", "SETTLEDATE")
+
+    # columns = None
+
     async with aiohttp.ClientSession() as session:
-        data = await aiomoex.get_board_history(session, tic_name, start, end, columns=columns, board=None)
+        data = await aiomoex.get_board_securities(session,
+                                                  table=rh.SECURITIES,
+                                                  columns=columns,
+                                                  board=None)  # board="TQBR"
+
         if len(data) > 0:
-            dbh.save_dict_to_table_temp(data, 'history.stock_shares_securities_history_2023_2023')
+            dbh.save_data_for_last_date(data, 'history.shares_list_on_date', 'SETTLEDATE')
+
         # df = pd.DataFrame(data)
-        # df.set_index('TRADEDATE', inplace=True)
-        # print(df.head(3), '\n')
-        # print(df.tail(3), '\n')
+        # df.set_index("SECID", inplace=True)
+        # print(df.head(10), "\n")
+        # print(df.tail(10), "\n")
         # df.info()
-        # print(len(df))
-        # print(len(data))
-        # print(data)
-        # print(df[df['SECID'] == 'SBER'])
-
-
-async def test_request():
-    # https://iss.moex.com/iss/history/engines/stock/markets/shares/securities/SBER?marketprice_board=1
-    request_url = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json"
-    arguments = {"securities.columns": ("SECID," "REGNUMBER," "LOTSIZE," "SHORTNAME")}
-
-    async with aiohttp.ClientSession() as session:
-        iss = aiomoex.ISSClient(session, request_url, arguments)
-        data = await iss.get()
-        df = pd.DataFrame(data["securities"])
-        df.set_index("SECID", inplace=True)
-        print(df.head(), "\n")
-        print(df.tail(), "\n")
-        df.info()
-        print(len(df))
+        # print(len(df), "\n")
+        # print(len(df[df['BOARDID'] == 'TQBR']))
 
 
 def get_history_till_20231214():
@@ -127,9 +107,53 @@ def get_history_till_20231214():
     for ticker in tickers_list:
         i += 1
         print(f'processing {i} of {len(tickers_list)}, ticker: {ticker}')
-        asyncio.run(one_ticker(ticker, start='2023-12-13', end='2023-12-13'))
+        asyncio.run(one_ticker_shares_market_for_dates_interval(ticker, start='2023-12-13', end='2023-12-13'))
         time.sleep(10)
 
+
+async def one_ticker_shares_market_for_dates_interval(tic_name, start, end):
+    """gets one ticker market data for date interval"""
+    columns = ("BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES", "VALUE", "OPEN", "LOW", "HIGH",
+               "LEGALCLOSEPRICE", "WAPRICE", "CLOSE", "VOLUME", "MARKETPRICE2", "MARKETPRICE3",
+               "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
+               "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
+    async with aiohttp.ClientSession() as session:
+        data = await aiomoex.get_board_history(session, tic_name, start, end, columns=columns, board=None)
+
+        # if len(data) > 0:
+        #     dbh.store_dict_to_table(data, 'history.stock_shares_securities_history_')
+
+        # df = pd.DataFrame(data)
+        # df.set_index('TRADEDATE', inplace=True)
+        # print(df.head(3), '\n')
+        # print(df.tail(3), '\n')
+        # df.info()
+        # print(len(df))
+        # print(len(data))
+        # print(data)
+        # print(df[df['SECID'] == 'SBER'])
+
+
+async def test_request():
+    """Перечень акций, торгующихся в режиме TQBR
+    Описание запроса - https://iss.moex.com/iss/reference/32
+
+    /iss/engines/[engine]/markets/[market]/boards/[board]/securities
+    Получить таблицу инструментов по режиму торгов.
+    Например: https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.xml
+
+    """
+    request_url = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/TQBR/securities.json"
+    arguments = {"securities.columns": ("SECID," "REGNUMBER," "LOTSIZE," "SHORTNAME")}
+
+    async with aiohttp.ClientSession() as session:
+        iss = aiomoex.ISSClient(session, request_url)  # , arguments)
+        data = await iss.get()
+        df = pd.DataFrame(data["securities"])
+        df.set_index("SECID", inplace=True)
+        print(df.head(10), "\n")
+        print(df.tail(10), "\n")
+        df.info()
 
 if __name__ == "__main__":
     logger.info("Routine started")
@@ -138,10 +162,17 @@ if __name__ == "__main__":
     # asyncio.run(test_request())
 
     # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
-    asyncio.run(all_shares_on_last_date())
+    asyncio.run(all_shares_all_boards_history_market_on_last_date())
+
+    time.sleep(3)
+
+    # Получить перечень акций на следующую дату
+    asyncio.run(all_shares_all_boards_list_on_current_date())
+
+    # asyncio.run(test_request())
 
     # get history of one ticker for a dates range and store to table
-    # asyncio.run(one_ticker('SVCB', start='2023-01-01', end='2023-12-14'))
+    # asyncio.run(one_ticker_shares_market_for_dates_interval('SVCB', start='2023-01-01', end='2023-12-14'))
 
     # get_history_till_20231214()  # get history of tickers in a loop for a dates range and store to table
 

@@ -3,7 +3,7 @@ from configparser import RawConfigParser
 from datetime import date
 import os
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 APP_FOLDER = '.moex_collector'
 CONF_APP_FILE = 'application.ini'

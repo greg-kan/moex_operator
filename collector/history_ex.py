@@ -32,7 +32,7 @@ def make_url_ex(
     return "".join(url_parts)
 
 
-async def get_board_history_all_securities_on_last_date(
+async def get_history_all_securities_on_last_date(
     session: aiohttp.ClientSession,
     columns: Optional[Iterable[str]] = ("BOARDID", "TRADEDATE", "CLOSE", "VOLUME", "VALUE"),
     board: str | None = DEFAULT_BOARD,
@@ -41,7 +41,7 @@ async def get_board_history_all_securities_on_last_date(
 ) -> client.Table:
     """Получить историю торгов для всех бумаг в указанном режиме торгов за последнюю дату.
 
-    Описание запроса - https://iss.moex.com/iss/reference/65 - TODO:ЭТО НЕ ТОЧНО
+    Описание запроса - https://iss.moex.com/iss/reference/65 - только с пустым securities и без дат
 
     :param session:
         Сессия http соединения.

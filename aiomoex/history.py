@@ -44,7 +44,7 @@ async def get_board_securities(
     session: aiohttp.ClientSession,
     table: str = SECURITIES,
     columns: Iterable[str] | None = ("SECID", "REGNUMBER", "LOTSIZE", "SHORTNAME"),
-    board: str = DEFAULT_BOARD,
+    board: str | None = DEFAULT_BOARD,
     market: str = DEFAULT_MARKET,
     engine: str = DEFAULT_ENGINE,
 ) -> client.Table:
