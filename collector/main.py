@@ -7,8 +7,11 @@ sys.path.append('/home/greg/proj/moex/moex_operator')
 sys.path.append('/home/greg/proj/moex/moex_operator/collector')
 sys.path.append('/home/greg/.virtualenvs/moex_operator_env/lib/python3.10/site-packages')
 sys.path.append('/home/greg/proj/moex/moex_operator/aiomoex')
+sys.path.append('/home/greg/proj/moex/moex_operator/apimoex')
 
+import requests
 import aiomoex
+import apimoex
 from aiomoex import request_helpers as rh
 import history_ex as h_ex
 import db_helper as dbh
@@ -20,6 +23,7 @@ logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
 
 async def all_shares_all_boards_history_market_on_last_date():
+    logger.info("Shares history on last date loading started")
     columns = ("BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES", "VALUE", "OPEN", "LOW", "HIGH",
                "LEGALCLOSEPRICE", "WAPRICE", "CLOSE", "VOLUME", "MARKETPRICE2", "MARKETPRICE3",
                "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
@@ -31,14 +35,15 @@ async def all_shares_all_boards_history_market_on_last_date():
         if len(data) > 0:
             dbh.save_data_for_last_date(data, 'history.stock_shares_securities_history', 'TRADEDATE')
 
+    logger.info("Shares history on last date loading finished")
+
 
 async def all_shares_all_boards_list_on_current_date():
+    logger.info("Shares reference on current date loading started")
     columns = ("SECID", "BOARDID", "SHORTNAME", "PREVPRICE", "LOTSIZE", "FACEVALUE", "STATUS",
                "BOARDNAME", "DECIMALS", "SECNAME", "REMARKS", "MARKETCODE", "INSTRID", "SECTORID", "MINSTEP",
                "PREVWAPRICE", "FACEUNIT", "PREVDATE", "ISSUESIZE", "ISIN", "LATNAME", "REGNUMBER", "PREVLEGALCLOSEPRICE",
                "CURRENCYID", "SECTYPE", "LISTLEVEL", "SETTLEDATE")
-
-    # columns = None
 
     async with aiohttp.ClientSession() as session:
         data = await aiomoex.get_board_securities(session,
@@ -56,6 +61,8 @@ async def all_shares_all_boards_list_on_current_date():
         # df.info()
         # print(len(df), "\n")
         # print(len(df[df['BOARDID'] == 'TQBR']))
+
+    logger.info("Shares reference on current date loading finished")
 
 
 def get_history_till_20231214():
@@ -155,6 +162,41 @@ async def test_request():
         print(df.tail(10), "\n")
         df.info()
 
+#  API MOEX ##########################################################
+
+
+def test_get_board_history():
+    with requests.Session() as session:
+        data = apimoex.get_board_history(session, 'SBER')
+        df = pd.DataFrame(data)
+        df.set_index('TRADEDATE', inplace=True)
+        print(df.head(), '\n')
+        print(df.tail(), '\n')
+        df.info()
+
+
+def test_request_by_client(group: str):
+    request_url = (f'https://iss.moex.com/iss/'
+                   f'securities.json?group_by=group&group_by_filter={group}')
+
+    # arguments = {'securities.columns': ('SECID,'
+    #                                     # 'REGNUMBER,'
+    #                                     # 'LOTSIZE,'
+    #                                     'SHORTNAME')}
+    arguments = {}
+    with requests.Session() as session:
+        iss = apimoex.ISSClient(session, request_url, query=arguments)
+        data = iss.get_all()
+        df = pd.DataFrame(data['securities'])
+        print(df.columns)
+        df.set_index('secid', inplace=True)
+        print(df.head(), '\n')
+        print(df.tail(), '\n')
+        print(len(df))
+        df.info()
+        print(df.loc[['SBER']])
+
+
 if __name__ == "__main__":
     logger.info("Routine started")
 
@@ -182,4 +224,3 @@ if __name__ == "__main__":
     #     print(i)
 
     logger.info("Routine finished")
-
