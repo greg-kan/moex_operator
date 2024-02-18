@@ -10,8 +10,6 @@ Table = list[TableRow]
 TablesDict = dict[str, Table]
 WebQuery = dict[str, str | int]
 
-BASE_QUERY = {"iss.json": "extended", "iss.meta": "off"}
-
 
 class ISSMoexError(Exception):
     """Базовое исключение."""
@@ -26,7 +24,7 @@ class ISSClient(abc.Iterable[TablesDict]):
     поддерживается протокол итерируемого для отдельных блоков или метод get_all для их автоматического сбора.
     """
 
-    def __init__(self, session: requests.Session, url: str, query: WebQuery | None = None) -> None:
+    def __init__(self, session: requests.Session, url: str, query: WebQuery | None = None, base_query=None) -> None:
         """MOEX ISS является REST сервером.
 
         Полный перечень запросов и параметров к ним https://iss.moex.com/iss/reference/
@@ -40,9 +38,13 @@ class ISSClient(abc.Iterable[TablesDict]):
             Перечень дополнительных параметров запроса. К списку дополнительных параметров всегда добавляется
             требование предоставить ответ в виде расширенного json без метаданных.
         """
+        if base_query is None:
+            base_query = {"iss.json": "extended", "iss.meta": "off"}
+
         self._session = session
         self._url = url
         self._query = query or {}
+        self._base_query = base_query
 
     def __repr__(self) -> str:
         """Наименование класса и содержание запроса к ISS Moex."""
@@ -107,7 +109,7 @@ class ISSClient(abc.Iterable[TablesDict]):
 
     def _make_query(self, start: int | None = None) -> WebQuery:
         """К общему набору параметров запроса добавляется требование предоставить ответ в виде расширенного json."""
-        query: WebQuery = dict(**BASE_QUERY, **self._query)
+        query: WebQuery = dict(**self._base_query, **self._query)
         if start:
             query["start"] = start
 

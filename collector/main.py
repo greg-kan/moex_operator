@@ -17,6 +17,7 @@ import history_ex as h_ex
 import db_helper as dbh
 import settings as st
 from logger import Logger
+from model import BondInitial, BondsInitial
 
 
 logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
@@ -168,16 +169,20 @@ async def test_request():
 def test_get_board_history():
     with requests.Session() as session:
         data = apimoex.get_board_history(session, 'SBER')
-        df = pd.DataFrame(data)
-        df.set_index('TRADEDATE', inplace=True)
-        print(df.head(), '\n')
-        print(df.tail(), '\n')
-        df.info()
+        print(data)
+        # df = pd.DataFrame(data)
+        # df.set_index('TRADEDATE', inplace=True)
+        # print(df.head(), '\n')
+        # print(df.tail(), '\n')
+        # df.info()
 
 
-def test_request_by_client(group: str):
+def test_request_by_client(group: str, limit: str, start: str):
     request_url = (f'https://iss.moex.com/iss/'
-                   f'securities.json?group_by=group&group_by_filter={group}')
+                   f'securities.json?group_by=group&group_by_filter={group}')  # &limit={limit}&start={start}
+
+    print(request_url)
+    print()
 
     # arguments = {'securities.columns': ('SECID,'
     #                                     # 'REGNUMBER,'
@@ -186,30 +191,71 @@ def test_request_by_client(group: str):
     arguments = {}
     with requests.Session() as session:
         iss = apimoex.ISSClient(session, request_url, query=arguments)
-        data = iss.get_all()
-        df = pd.DataFrame(data['securities'])
-        print(df.columns)
-        df.set_index('secid', inplace=True)
-        print(df.head(), '\n')
-        print(df.tail(), '\n')
-        print(len(df))
-        df.info()
-        print(df.loc[['SBER']])
+        data = iss.get()
+        print(data.keys())
+        print(data['securities'])
+        print()
+        # df = pd.DataFrame(data['securities'])
+        # print(df.columns)
+        # df.set_index('secid', inplace=True)
+        # print(df.head(), '\n')
+        # print(df.tail(), '\n')
+        # print(len(df))
+        # df.info()
+        # print(df.loc[['SBER']])
 
 
 if __name__ == "__main__":
     logger.info("Routine started")
 
-    # for requests testing
-    # asyncio.run(test_request())
+    # bond_initial1 = BondInitial({"id": "3", "name": "Name1"})
+    # print(bond_initial1.get())
+    # print(bond_initial1.get_attribute("name"))
+    # bond_initial1.set_attribute("name", "Name2")
+    # print(bond_initial1.get_attribute("name"))
+    # bond_initial1.set({"id": "7", "name": "Name7"})
+    # print(bond_initial1.get())
+
+    # Получить перечень облигаций
+    bonds_initial1 = BondsInitial()
+    asyncio.run(bonds_initial1.load_data_from_internet_async())
+    # bonds_initial1.test_sp()
+    bonds_initial1.store_data_to_db()
 
     # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
     asyncio.run(all_shares_all_boards_history_market_on_last_date())
 
     time.sleep(3)
 
-    # Получить перечень акций на следующую дату
+    # Получить перечень акций на следующую дату ???
     asyncio.run(all_shares_all_boards_list_on_current_date())
+
+
+    # bonds_initial1._load_data_of_all_columns_from_db()
+
+    # asyncio.run(bonds_initial1.load_data_from_internet_async())
+
+    # print(len(bonds_initial1.data))
+
+    # print()
+
+    # data1 = bonds_initial1.load_data_from_db()[:2]
+
+    # print(data1)
+
+    # field_data_lst = dbh.get_field_from_table('reference.bonds_initial', 'secid')
+    # print(field_data_lst)
+
+    # bonds_initial1.load_metadata_from_internet()
+
+    # test_request_by_client('stock_bonds', '10', '100')
+    #
+    # print()
+    #
+    # test_get_board_history()
+
+    # for requests testing
+    # asyncio.run(test_request())
 
     # asyncio.run(test_request())
 
