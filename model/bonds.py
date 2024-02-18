@@ -135,6 +135,16 @@ class BondsInitial:
                 changed_records_from_internet_to_insert = compare_records(records_from_internet_to_check_for_update,
                                                                           records_from_db_to_compare_for_update)
                 if changed_records_from_internet_to_insert and len(changed_records_from_internet_to_insert) > 0:
+                    # updating updatetimestamp in db for changed records TODO:
+                    tickers_of_records_to_update = [rec['secid'] for rec in changed_records_from_internet_to_insert]
+                    logger.info(f"BondsInitial.store_data_to_db(): Closing {len(tickers_of_records_to_update)} "
+                                f"old BondsInitial records")
+
+                    dbh.update_db_table_records_by_ids(tickers_of_records_to_update,
+                                                       BONDS_INITIAL_DB_TABLE, cur_time)  # remove cur_time
+                    logger.info(f"BondsInitial.store_data_to_db(): {len(tickers_of_records_to_update)} "
+                                f"old BondsInitial records closed")
+
                     # inserting changed records
                     logger.info(f"BondsInitial.store_data_to_db(): Storing {len(changed_records_from_internet_to_insert)} "
                                 f"changed BondsInitial records")
@@ -143,7 +153,6 @@ class BondsInitial:
                     logger.info(f"BondsInitial.store_data_to_db():  {len(changed_records_from_internet_to_insert)} "
                                 f"changed BondsInitial records stored")
 
-                    # updating updatetimestamp in db for changed records TODO:
                 else:
                     logger.info(f"BondsInitial.store_data_to_db(): "
                                 f"No changed BondsInitial records to store")
@@ -161,7 +170,7 @@ class BondsInitial:
                             f"new BondsInitial records")
                 dbh.store_list_dicts_to_table(new_records_from_internet_to_insert,
                                               BONDS_INITIAL_DB_TABLE, cur_time)  # remove cur_time
-                logger.info(f"BondsInitial.store_data_to_db():  {len(new_records_from_internet_to_insert)} "
+                logger.info(f"BondsInitial.store_data_to_db(): {len(new_records_from_internet_to_insert)} "
                             f"new BondsInitial records stored")
             else:
                 logger.info(f"BondsInitial.store_data_to_db(): "
