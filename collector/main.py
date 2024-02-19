@@ -216,11 +216,13 @@ if __name__ == "__main__":
     # bond_initial1.set({"id": "7", "name": "Name7"})
     # print(bond_initial1.get())
 
-    # # Получить перечень облигаций
-    # bonds_initial1 = BondsInitial()
-    # asyncio.run(bonds_initial1.load_data_from_internet_async())
-    # # bonds_initial1.test_sp()
-    # bonds_initial1.store_data_to_db()
+    # Получить перечень облигаций
+    bonds_initial1 = BondsInitial()
+    asyncio.run(bonds_initial1.load_data_from_internet_async())
+    # bonds_initial1.test_sp()
+    bonds_initial1.store_data_to_db()
+
+    time.sleep(3)
 
     # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
     asyncio.run(all_shares_all_boards_history_market_on_last_date())
@@ -229,7 +231,6 @@ if __name__ == "__main__":
 
     # Получить перечень акций на следующую дату ???
     asyncio.run(all_shares_all_boards_list_on_current_date())
-
 
     # bonds_initial1._load_data_of_all_columns_from_db()
 

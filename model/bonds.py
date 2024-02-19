@@ -150,7 +150,7 @@ class BondsInitial:
                                 f"changed BondsInitial records")
                     dbh.store_list_dicts_to_table(changed_records_from_internet_to_insert,
                                                   BONDS_INITIAL_DB_TABLE, cur_time)  # remove cur_time
-                    logger.info(f"BondsInitial.store_data_to_db():  {len(changed_records_from_internet_to_insert)} "
+                    logger.info(f"BondsInitial.store_data_to_db(): {len(changed_records_from_internet_to_insert)} "
                                 f"changed BondsInitial records stored")
 
                 else:
