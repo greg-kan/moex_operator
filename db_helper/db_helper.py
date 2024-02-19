@@ -57,13 +57,22 @@ def save_data_for_last_date(data, str_table, str_date_field):
 
 def modify_db_table_records_by_ids(conn, cur, ids, str_table, cur_time):
 
-    query = ("update " + str_table + " set updatetimestamp = {} where secid in ({});"
-             .format(cur_time, ','.join(ids[:5])))
+    # query = ("update " + str_table + " set updatetimestamp = {} where secid in ({});"
+    #          .format(cur_time, ','.join(ids)))
+
+    secids = ','.join(ids)
+    print(ids)
+    print(secids)
+    query = ("update " + str_table + " set updatetimestamp = %s where secid in %s;")
+    # cur.execute(query, (cur_time, ids,))
+    # updated_row_count = cur.rowcount
 
     # query = ("INSERT INTO " + str_table + " ({}) VALUES %s;"
     #          .format(','.join(columns)))
 
-    print(query)
+    # conn.commit()
+    print('query = ' + str(query))
+    # return updated_row_count
 
 
 def save_list_dicts_to_table(connection, cursor, data, str_table, cur_time=None):
