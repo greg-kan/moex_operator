@@ -10,14 +10,14 @@ from datetime import datetime
 
 logger = Logger('bonds', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
-BONDS_INITIAL_FILTER_GROUP = "stock_bonds"
-BONDS_INITIAL_REQUEST_URL = (f'https://iss.moex.com/iss/'
-                             f'securities.json?group_by=group&group_by_filter={BONDS_INITIAL_FILTER_GROUP}')
-BONDS_INITIAL_DB_TABLE = 'reference.bonds_initial'
-BONDS_INITIAL_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", "isin", "is_traded",
+BONDS_BASE_FILTER_GROUP = "stock_bonds"
+BONDS_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
+                          f'securities.json?group_by=group&group_by_filter={BONDS_BASE_FILTER_GROUP}')
+BONDS_BASE_DB_TABLE = 'reference.bonds_initial'
+BONDS_BASE_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", "isin", "is_traded",
                                   "emitent_id", "emitent_title", "emitent_inn", "emitent_okpo", "gosreg",
                                   "type", "group", "primary_boardid", "marketprice_boardid"]
-BONDS_INITIAL_METADATA = {
+SECURITIES_BASE_METADATA = {
     "id": {"type": "int32"},
     "secid": {"type": "string", "bytes": 51, "max_size": 0},
     "shortname": {"type": "string", "bytes": 189, "max_size": 0},
@@ -54,27 +54,29 @@ class BondInitial:
         return self.bond[name]
 
 
-class BondsInitial:
+class SecuritiesBase:
     def __init__(self):
-        # self.bonds: list[BondInitial] | None = None
         self.metadata: dict[list[dict[str, dict]]] | None = None
         self.data: list[dict] | None = None
-        self.db_table: str = BONDS_INITIAL_DB_TABLE
+        self.class_name = self.__class__.__name__
+        self.request_url: str = ''
+        self.db_table: str = ''
 
     async def load_data_from_internet_async(self):
         # arguments = {'securities.columns': ('SECID', 'REGNUMBER', 'LOTSIZE', 'SHORTNAME')}
         arguments = {}
         async with aiohttp.ClientSession() as session:
-            iss = aiomoex.ISSClient(session, BONDS_INITIAL_REQUEST_URL, query=arguments)
+            iss = aiomoex.ISSClient(session, self.request_url, query=arguments)
             data = await iss.get_all()  # iss.get()
             self.data = data['securities']
-            logger.info(f"BondsInitial.load_data_from_internet_async(): {len(self.data)} BondsInitial records loaded")
+            logger.info(f"{self.class_name}.load_data_from_internet_async(): "
+                        f"{len(self.data)} BondsInitial records loaded")
 
     def load_data_from_internet(self):
         # arguments = {'securities.columns': ('SECID', 'REGNUMBER', 'LOTSIZE', 'SHORTNAME')}
         arguments = {}
         with requests.Session() as session:
-            iss = apimoex.ISSClient(session, BONDS_INITIAL_REQUEST_URL, query=arguments)
+            iss = apimoex.ISSClient(session, self.request_url, query=arguments)
             data = iss.get_all()
             self.data = data['securities']
             logger.info(f"BondsInitial.load_data_from_internet(): {len(self.data)} BondsInitial records loaded")
@@ -83,7 +85,7 @@ class BondsInitial:
         arguments = {}
         with requests.Session() as session:
             base_query = {"iss.json": "extended", "iss.meta": "on", "iss.data": "off"}
-            iss = apimoex.ISSClient(session, BONDS_INITIAL_REQUEST_URL, query=arguments, base_query=base_query)
+            iss = apimoex.ISSClient(session, self.request_url, query=arguments, base_query=base_query)
             data = iss.get()
             self.metadata = data["securities"][0]["metadata"]
             logger.info(f"BondsInitial.load_metadata_from_internet(): BondsInitial metadata loaded")
@@ -101,14 +103,14 @@ class BondsInitial:
                         f"BondsInitial records loaded from internet")
 
             active_records_in_db: list[dict] = (
-                dbh.get_list_dicts_from_table_by_condition(BONDS_INITIAL_DB_TABLE,
-                                                           BONDS_INITIAL_DB_TABLE_COLUMNS,
+                dbh.get_list_dicts_from_table_by_condition(self.db_table,
+                                                           BONDS_BASE_DB_TABLE_COLUMNS,
                                                            condition_str='where updatetimestamp is null')
             )
 
             if active_records_in_db and len(active_records_in_db) > 0:
                 logger.info(f"BondsInitial.store_data_to_db(): {len(active_records_in_db)} "
-                            f"active BondsInitial records are in the db table {BONDS_INITIAL_DB_TABLE}")
+                            f"active BondsInitial records are in the db table {self.db_table}")
 
                 tickers_unique_in_table_lst = [rec['secid'] for rec in active_records_in_db]
 
@@ -141,7 +143,7 @@ class BondsInitial:
                                 f"old BondsInitial records")
 
                     dbh.update_db_table_records_by_ids(tickers_of_records_to_update,
-                                                       BONDS_INITIAL_DB_TABLE, cur_time)  # remove cur_time
+                                                       self.db_table, cur_time)  # remove cur_time
                     logger.info(f"BondsInitial.store_data_to_db(): {len(tickers_of_records_to_update)} "
                                 f"old BondsInitial records closed")
 
@@ -149,7 +151,7 @@ class BondsInitial:
                     logger.info(f"BondsInitial.store_data_to_db(): Storing {len(changed_records_from_internet_to_insert)} "
                                 f"changed BondsInitial records")
                     dbh.store_list_dicts_to_table(changed_records_from_internet_to_insert,
-                                                  BONDS_INITIAL_DB_TABLE, cur_time)  # remove cur_time
+                                                  self.db_table, cur_time)  # remove cur_time
                     logger.info(f"BondsInitial.store_data_to_db(): {len(changed_records_from_internet_to_insert)} "
                                 f"changed BondsInitial records stored")
 
@@ -159,7 +161,7 @@ class BondsInitial:
 
             else:
                 logger.info(f"BondsInitial.store_data_to_db(): "
-                            f"No active BondsInitial records are in the db table {BONDS_INITIAL_DB_TABLE}")
+                            f"No active BondsInitial records are in the db table {self.db_table}")
 
                 # all records from the Internet
                 new_records_from_internet_to_insert: list[dict] = self.data
@@ -169,7 +171,7 @@ class BondsInitial:
                 logger.info(f"BondsInitial.store_data_to_db(): Storing {len(new_records_from_internet_to_insert)} "
                             f"new BondsInitial records")
                 dbh.store_list_dicts_to_table(new_records_from_internet_to_insert,
-                                              BONDS_INITIAL_DB_TABLE, cur_time)  # remove cur_time
+                                              self.db_table, cur_time)  # remove cur_time
                 logger.info(f"BondsInitial.store_data_to_db(): {len(new_records_from_internet_to_insert)} "
                             f"new BondsInitial records stored")
             else:
@@ -183,5 +185,12 @@ class BondsInitial:
     #     return dbh.get_list_dicts_from_table_by_condition(BONDS_INITIAL_DB_TABLE)
 
     def test_sp(self):
-        res = dbh.store_list_dicts_to_table_json(self.data, BONDS_INITIAL_DB_TABLE)
+        res = dbh.store_list_dicts_to_table_json(self.data, self.db_table)
         print(res)
+
+
+class BondsBase(SecuritiesBase):
+    def __init__(self):
+        super().__init__()
+        self.request_url: str = BONDS_BASE_REQUEST_URL
+        self.db_table: str = BONDS_BASE_DB_TABLE
