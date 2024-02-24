@@ -219,35 +219,35 @@ if __name__ == "__main__":
     # Получить перечень облигаций
     bonds_base1 = BondsBase()
     asyncio.run(bonds_base1.load_data_from_internet_async())
-    # bonds_initial1.test_sp()
+    # bonds_base1.test_sp()
     bonds_base1.store_data_to_db()
 
     time.sleep(3)
 
-    # # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
-    # asyncio.run(all_shares_all_boards_history_market_on_last_date())
-    #
-    # time.sleep(3)
-    #
-    # # Получить перечень акций на следующую дату ???
-    # asyncio.run(all_shares_all_boards_list_on_current_date())
+    # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
+    asyncio.run(all_shares_all_boards_history_market_on_last_date())
 
-    # bonds_initial1._load_data_of_all_columns_from_db()
+    time.sleep(3)
 
-    # asyncio.run(bonds_initial1.load_data_from_internet_async())
+    # Получить перечень акций на следующую дату ???
+    asyncio.run(all_shares_all_boards_list_on_current_date())
 
-    # print(len(bonds_initial1.data))
+    # bonds_base1._load_data_of_all_columns_from_db()
+
+    # asyncio.run(bonds_base1.load_data_from_internet_async())
+
+    # print(len(bonds_base1.data))
 
     # print()
 
-    # data1 = bonds_initial1.load_data_from_db()[:2]
+    # data1 = bonds_base1.load_data_from_db()[:2]
 
     # print(data1)
 
-    # field_data_lst = dbh.get_field_from_table('reference.bonds_initial', 'secid')
+    # field_data_lst = dbh.get_field_from_table('reference.bonds_base', 'secid')
     # print(field_data_lst)
 
-    # bonds_initial1.load_metadata_from_internet()
+    # bonds_base1.load_metadata_from_internet()
 
     # test_request_by_client('stock_bonds', '10', '100')
     #
