@@ -18,6 +18,7 @@ import db_helper as dbh
 import settings as st
 from logger import Logger
 from model import BondsBase, SharesBase
+from model import SecuritiesHistory
 
 
 logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
@@ -208,73 +209,31 @@ def test_request_by_client(group: str, limit: str, start: str):
 if __name__ == "__main__":
     logger.info("Routine started")
 
-    # bond_initial1 = BondInitial({"id": "3", "name": "Name1"})
-    # print(bond_initial1.get())
-    # print(bond_initial1.get_attribute("name"))
-    # bond_initial1.set_attribute("name", "Name2")
-    # print(bond_initial1.get_attribute("name"))
-    # bond_initial1.set({"id": "7", "name": "Name7"})
-    # print(bond_initial1.get())
-
-    # Получить перечень облигаций
-    bonds_base1 = BondsBase()
-    asyncio.run(bonds_base1.load_data_from_internet_async())
-    # bonds_base1.test_sp()
-    bonds_base1.store_data_to_db()
-
-    time.sleep(3)
-
-    # Получить перечень акций
-    shares_base1 = SharesBase()
-    asyncio.run(shares_base1.load_data_from_internet_async())
-    shares_base1.store_data_to_db()
-
-    time.sleep(3)
-
     # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
-    asyncio.run(all_shares_all_boards_history_market_on_last_date())
+    shares_history1 = SecuritiesHistory()
+    asyncio.run(shares_history1.load_data_from_internet_async())
 
-    time.sleep(3)
-
-    # Получить перечень акций на следующую дату ???
-    asyncio.run(all_shares_all_boards_list_on_current_date())
-
-    # bonds_base1._load_data_of_all_columns_from_db()
-
+    # # Получить перечень облигаций
+    # bonds_base1 = BondsBase()
     # asyncio.run(bonds_base1.load_data_from_internet_async())
-
-    # print(len(bonds_base1.data))
-
-    # print()
-
-    # data1 = bonds_base1.load_data_from_db()[:2]
-
-    # print(data1)
-
-    # field_data_lst = dbh.get_field_from_table('reference.bonds_base', 'secid')
-    # print(field_data_lst)
-
-    # bonds_base1.load_metadata_from_internet()
-
-    # test_request_by_client('stock_bonds', '10', '100')
+    # # bonds_base1.test_sp()
+    # bonds_base1.store_data_to_db()
     #
-    # print()
+    # time.sleep(3)
     #
-    # test_get_board_history()
-
-    # for requests testing
-    # asyncio.run(test_request())
-
-    # asyncio.run(test_request())
-
-    # get history of one ticker for a dates range and store to table
-    # asyncio.run(one_ticker_shares_market_for_dates_interval('SVCB', start='2023-01-01', end='2023-12-14'))
-
-    # get_history_till_20231214()  # get history of tickers in a loop for a dates range and store to table
-
-    # print(os.getcwd())  # returns the current working directory
-
-    # for i in sys.path:    # returns sys path strings
-    #     print(i)
+    # # Получить перечень акций
+    # shares_base1 = SharesBase()
+    # asyncio.run(shares_base1.load_data_from_internet_async())
+    # shares_base1.store_data_to_db()
+    #
+    # time.sleep(3)
+    #
+    # # Получить историю торгов для всех акций во всех режимах торгов за последнюю дату
+    # asyncio.run(all_shares_all_boards_history_market_on_last_date())
+    #
+    # time.sleep(3)
+    #
+    # # Получить перечень акций на следующую дату ???
+    # asyncio.run(all_shares_all_boards_list_on_current_date())
 
     logger.info("Routine finished")
