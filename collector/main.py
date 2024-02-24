@@ -17,7 +17,7 @@ import history_ex as h_ex
 import db_helper as dbh
 import settings as st
 from logger import Logger
-from model import BondInitial, BondsBase
+from model import BondsBase, SharesBase
 
 
 logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
@@ -32,7 +32,7 @@ async def all_shares_all_boards_history_market_on_last_date():
     async with aiohttp.ClientSession() as session:
         data = await h_ex.get_history_all_securities_on_last_date(session,
                                                                   columns=columns,
-                                                                  board=None)
+                                                                  board="TQBR")  # board=None
         if len(data) > 0:
             dbh.save_data_for_last_date(data, 'history.stock_shares_securities_history', 'TRADEDATE')
 
@@ -50,7 +50,7 @@ async def all_shares_all_boards_list_on_current_date():
         data = await aiomoex.get_board_securities(session,
                                                   table=rh.SECURITIES,
                                                   columns=columns,
-                                                  board=None)  # board="TQBR"
+                                                  board="TQBR")  # board=None
 
         if len(data) > 0:
             dbh.save_data_for_last_date(data, 'history.shares_list_on_date', 'SETTLEDATE')
@@ -221,6 +221,13 @@ if __name__ == "__main__":
     asyncio.run(bonds_base1.load_data_from_internet_async())
     # bonds_base1.test_sp()
     bonds_base1.store_data_to_db()
+
+    time.sleep(3)
+
+    # Получить перечень акций
+    shares_base1 = SharesBase()
+    asyncio.run(shares_base1.load_data_from_internet_async())
+    shares_base1.store_data_to_db()
 
     time.sleep(3)
 

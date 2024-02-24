@@ -1,6 +1,7 @@
 create schema history;
 CREATE SCHEMA reference;
 
+--truncate table history.stock_shares_securities_history;
 create table history.stock_shares_securities_history (
  boardid varchar(32),
  tradedate date,
@@ -29,7 +30,7 @@ create table history.stock_shares_securities_history (
 );
 
 
---truncate table history.stock_shares_securities_history_2023;
+--truncate table history.stock_shares_securities_history_2023_2023;
 create table history.stock_shares_securities_history_2023_2023 (
  boardid varchar(32),
  tradedate date,
@@ -92,6 +93,7 @@ create table history.shares_list_on_date (
 
 ------------------------------
 --drop table reference.bonds_list_on_date;
+--truncate table reference.bonds_list_on_date;
 create table reference.bonds_list_on_date (
  secid varchar(64),
  boardid varchar(32),
@@ -138,6 +140,7 @@ create table reference.bonds_list_on_date (
 
 
 --drop table reference.bonds_base;
+--truncate table reference.bonds_base;
 create table reference.bonds_base (
  id integer,
  secid varchar(64),
@@ -160,6 +163,7 @@ create table reference.bonds_base (
 );
 
 --drop table reference.shares_base;
+--truncate table reference.shares_base;
 create table reference.shares_base (
  id integer,
  secid varchar(64),

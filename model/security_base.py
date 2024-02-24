@@ -10,13 +10,27 @@ from datetime import datetime
 
 logger = Logger('security_base', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
-BONDS_BASE_FILTER_GROUP = "stock_bonds"
+# BONDS_BASE_FILTER_GROUP = "stock_bonds"
+# BONDS_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
+#                           f'securities.json?group_by=group&group_by_filter={BONDS_BASE_FILTER_GROUP}')
+
 BONDS_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
-                          f'securities.json?group_by=group&group_by_filter={BONDS_BASE_FILTER_GROUP}')
+                          f'securities.json?engine=stock&market=bonds')
 BONDS_BASE_DB_TABLE = 'reference.bonds_base'
 BONDS_BASE_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", "isin", "is_traded",
                                   "emitent_id", "emitent_title", "emitent_inn", "emitent_okpo", "gosreg",
                                   "type", "group", "primary_boardid", "marketprice_boardid"]
+
+# SHARES_BASE_FILTER_GROUP = "stock_shares"
+# SHARES_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
+#                            f'securities.json?group_by=group&group_by_filter={SHARES_BASE_FILTER_GROUP}')
+
+SHARES_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
+                           f'securities.json?engine=stock&market=shares')
+SHARES_BASE_DB_TABLE = 'reference.shares_base'
+SHARES_BASE_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", "isin", "is_traded",
+                                "emitent_id", "emitent_title", "emitent_inn", "emitent_okpo", "gosreg",
+                                "type", "group", "primary_boardid", "marketprice_boardid"]
 SECURITIES_BASE_METADATA = {
     "id": {"type": "int32"},
     "secid": {"type": "string", "bytes": 51, "max_size": 0},
@@ -188,3 +202,11 @@ class BondsBase(SecuritiesBase):
         self.request_url: str = BONDS_BASE_REQUEST_URL
         self.db_table: str = BONDS_BASE_DB_TABLE
         self.db_table_columns: list[str] = BONDS_BASE_DB_TABLE_COLUMNS
+
+
+class SharesBase(SecuritiesBase):
+    def __init__(self):
+        super().__init__()
+        self.request_url: str = SHARES_BASE_REQUEST_URL
+        self.db_table: str = SHARES_BASE_DB_TABLE
+        self.db_table_columns: list[str] = SHARES_BASE_DB_TABLE_COLUMNS
