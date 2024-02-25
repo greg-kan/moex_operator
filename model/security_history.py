@@ -1,14 +1,8 @@
-import requests
-import apimoex
 import aiomoex
 import aiohttp
 from logger import Logger
 import settings as st
 import db_helper as dbh
-from operator import itemgetter
-from datetime import datetime
-import pandas as pd
-import collector.history_ex as h_ex
 
 logger = Logger('security_history', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
@@ -17,11 +11,14 @@ SHARES_HISTORY_REQUEST_URL = (f'https://iss.moex.com/iss/history/engines/'
                               f'stock/markets/shares/boards/{SHARES_HISTORY_BOARD}/securities.json')
 SHARES_HISTORY_DB_TABLE = 'history.stock_shares_securities_history'
 
-SHARES_HISTORY_DB_TABLE_COLUMNS = ("BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES",
+SHARES_HISTORY_DB_TABLE_COLUMNS = ["BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES",
                                    "VALUE", "OPEN", "LOW", "HIGH", "LEGALCLOSEPRICE", "WAPRICE",
                                    "CLOSE", "VOLUME", "MARKETPRICE2", "MARKETPRICE3", "ADMITTEDQUOTE",
                                    "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
-                                   "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
+                                   "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR"]
+
+BONDS_HISTORY_REQUEST_URL = 'https://iss.moex.com/iss/history/engines/stock/markets/bonds/securities.json'
+BONDS_HISTORY_DB_TABLE = 'history.stock_bonds_securities_history'
 
 SHARES_HISTORY_METADATA = {
     "BOARDID": {"type": "string", "bytes": 12, "max_size": 0},
@@ -96,19 +93,12 @@ class SecuritiesHistory:
         self.metadata: dict[list[dict[str, dict]]] | None = None
         self.data: list[dict] | None = None
         self.class_name = self.__class__.__name__
-        self.request_url: str = SHARES_HISTORY_REQUEST_URL
+        self.request_url: str = ''
         self.db_table: str = ''
         self.db_table_columns: list[str] = []
 
     async def load_data_from_internet_async(self):
-
-        columns = ("BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES", "VALUE", "OPEN", "LOW", "HIGH",
-                   "LEGALCLOSEPRICE", "WAPRICE", "CLOSE", "VOLUME", "MARKETPRICE2", "MARKETPRICE3",
-                   "ADMITTEDQUOTE", "MP2VALTRD", "MARKETPRICE3TRADESVALUE", "ADMITTEDVALUE", "WAVAL",
-                   "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR")
-
-
-        # arguments = {'securities.columns': ('SECID', 'REGNUMBER', 'LOTSIZE', 'SHORTNAME')}
+        # arguments = {'securities.columns': tuple(self.db_table_columns)}
         arguments = {}
         async with aiohttp.ClientSession() as session:
 
@@ -116,19 +106,31 @@ class SecuritiesHistory:
             data = await iss.get_all()  # iss.get()
             self.data = data['history']
 
-            # self.data = await h_ex.get_history_all_securities_on_last_date(session,
-            #                                                                columns=columns,
-            #                                                                board="TQBR")  # board=None
-
-            df = pd.DataFrame(self.data)
-            df.set_index("SECID", inplace=True)
-            print(df.head(10), "\n")
-            print(df.tail(10), "\n")
-            df.info()
-            print(len(df), "\n")
-
-            # if len(data) > 0:
-            #     dbh.save_data_for_last_date(data, 'history.stock_shares_securities_history', 'TRADEDATE')
-
         logger.info(f"{self.class_name}.load_data_from_internet_async(): "
                     f"{len(self.data)} {self.class_name} records loaded")
+
+    def store_data_to_db(self):
+        if self.data and len(self.data) > 0:
+            logger.info(f"{self.class_name}.store_data_to_db(): {len(self.data)} "
+                        f"{self.class_name} records loaded from internet")
+
+            inserted_rows = dbh.save_data_for_last_date(self.data, self.db_table, 'TRADEDATE')
+
+            logger.info(f"{self.class_name}.store_data_to_db(): {inserted_rows} "
+                        f"new {self.class_name} records stored. All data length = {len(self.data)}")
+
+
+class SharesHistory(SecuritiesHistory):
+    def __init__(self):
+        super().__init__()
+        self.request_url: str = SHARES_HISTORY_REQUEST_URL
+        self.db_table: str = SHARES_HISTORY_DB_TABLE
+        # self.db_table_columns: list[str] = SHARES_HISTORY_DB_TABLE_COLUMNS
+
+
+class BondsHistory(SecuritiesHistory):
+    def __init__(self):
+        super().__init__()
+        self.request_url: str = BONDS_HISTORY_REQUEST_URL
+        self.db_table: str = BONDS_HISTORY_DB_TABLE
+        # self.db_table_columns: list[str] =

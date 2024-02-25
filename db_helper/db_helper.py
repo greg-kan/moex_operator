@@ -8,7 +8,8 @@ from datetime import datetime
 logger = Logger('db_helper', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
 
-def save_data_for_last_date(data, str_table, str_date_field):
+def save_data_for_last_date(data, str_table, str_date_field) -> int:
+    inserted_rows: int = 0
     conn = None
     try:
         params = st.DB_PARAMS
@@ -18,9 +19,9 @@ def save_data_for_last_date(data, str_table, str_date_field):
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
 
-        # extract records with BOARDID = 'TQBR',
-        data_tqbr = [d for d in data if d['BOARDID'] == 'TQBR']
-        current_date_str = data_tqbr[0][str_date_field]
+        # for shares market data works only if BOARDID = 'TQBR', now restriction has been set
+        # data_tqbr = [d for d in data if d['BOARDID'] == 'TQBR']
+        current_date_str = data[0][str_date_field]
         if current_date_str:
             current_date = datetime.strptime(current_date_str, '%Y-%m-%d').date()
             logger.info(f'current_date = {current_date}')
@@ -28,7 +29,7 @@ def save_data_for_last_date(data, str_table, str_date_field):
             #  Initialize with synthetic earliest date
             previous_date = datetime.strptime(st.EARLIEST_DATE_STR, '%Y-%m-%d').date()
             #  Reading the last stored records' date
-            query = ("SELECT max({}) from {} where BOARDID = '{}';".format(str_date_field, str_table, 'TQBR'))
+            query = ("SELECT max({}) from {};".format(str_date_field, str_table))
             cur.execute(query)
 
             previous_dates = cur.fetchone()
@@ -42,7 +43,7 @@ def save_data_for_last_date(data, str_table, str_date_field):
             if current_date > previous_date:
                 #  Store to table
                 logger.info(f'Storing {len(data)} records with new date {current_date} to table {str_table}')
-                save_list_dicts_to_table(conn, cur, data, str_table)
+                inserted_rows = save_list_dicts_to_table(conn, cur, data, str_table)
         else:
             logger.info('No current date')
 
@@ -53,6 +54,7 @@ def save_data_for_last_date(data, str_table, str_date_field):
         if conn is not None:
             conn.close()
             logger.info('Database connection closed.')
+        return inserted_rows
 
 
 def modify_db_table_records_by_ids(conn, cur, ids, str_table, cur_time):
@@ -67,7 +69,7 @@ def modify_db_table_records_by_ids(conn, cur, ids, str_table, cur_time):
     return updated_row_count
 
 
-def save_list_dicts_to_table(connection, cursor, data, str_table, cur_time=None):
+def save_list_dicts_to_table(connection, cursor, data, str_table, cur_time=None) -> int:
 
     if cur_time:
         for row in data:
@@ -80,8 +82,9 @@ def save_list_dicts_to_table(connection, cursor, data, str_table, cur_time=None)
     query = ("INSERT INTO " + str_table + " ({}) VALUES %s;"
              .format(','.join(columns)))
     values = [[value for value in item.values()] for item in data]
-    execute_values(cursor, query, values)
+    execute_values(cursor, query, values, page_size=10000)
     connection.commit()
+    return cursor.rowcount
 
 
 def save_list_dicts_to_table_json(connection, cursor, json_data, str_table):

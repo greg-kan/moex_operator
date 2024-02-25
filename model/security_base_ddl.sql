@@ -5,7 +5,7 @@ CREATE SCHEMA reference;
 create table history.stock_shares_securities_history (
  boardid varchar(32),
  tradedate date,
- shortname varchar(256),----------------64
+ shortname varchar(256),
  secid varchar(64),
  numtrades numeric(15,2),
  value numeric(15,2),
@@ -30,11 +30,55 @@ create table history.stock_shares_securities_history (
 );
 
 
+--truncate table history.stock_bonds_securities_history;
+create table history.stock_bonds_securities_history (
+ boardid varchar(32),
+ tradedate date,
+ shortname varchar(256),
+ secid varchar(64),
+ numtrades numeric(15,2),
+ value numeric(15,2),
+ low numeric(15,2),
+ high numeric(15,2),
+ close numeric(15,2),
+ legalcloseprice numeric(15,2),
+ ACCINT double precision,
+ waprice numeric(15,2),
+ YIELDCLOSE numeric(15,2),
+ open numeric(15,2),
+ volume numeric(15,2),
+ marketprice2 numeric(15,2),
+ marketprice3 numeric(15,2),
+ admittedquote numeric(15,2),
+ mp2valtrd numeric(15,2),
+ marketprice3tradesvalue numeric(15,2),
+ admittedvalue numeric(15,2),
+ MATDATE varchar(16), ---- recreate with type date and fix tis dates "0000-00-00"
+ DURATION double precision,
+ YIELDATWAP numeric(15,2),
+ IRICPICLOSE double precision,
+ BEICLOSE double precision,
+ COUPONPERCENT numeric(15,2),
+ COUPONVALUE numeric(15,2),
+ BUYBACKDATE varchar(16), ---- recreate with type date and fix tis dates "0000-00-00"
+ LASTTRADEDATE varchar(16), ---- recreate with type date and fix tis dates "0000-00-00"
+ facevalue double precision,
+ CURRENCYID varchar(16),
+ CBRCLOSE double precision,
+ YIELDTOOFFER double precision,
+ YIELDLASTCOUPON double precision,
+ OFFERDATE varchar(16),
+ FACEUNIT varchar(16),
+ TRADINGSESSION integer,
+ inserttimestamp timestamp DEFAULT current_timestamp
+);
+
+
 --truncate table history.stock_shares_securities_history_2023_2023;
 create table history.stock_shares_securities_history_2023_2023 (
  boardid varchar(32),
  tradedate date,
- shortname varchar(256),------------64
+ shortname varchar(256),
  secid varchar(64),
  numtrades numeric(15,2),
  value numeric(15,2),
@@ -63,7 +107,7 @@ create table history.stock_shares_securities_history_2023_2023 (
 create table history.shares_list_on_date (
  secid varchar(64),
  boardid varchar(32),
- shortname varchar(256), ---------64
+ shortname varchar(256),
  prevprice numeric(15,2),
  lotsize integer,
  facevalue double precision,
