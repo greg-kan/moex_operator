@@ -54,7 +54,8 @@ async def all_shares_all_boards_list_on_current_date():
                                                   board="TQBR")  # board=None
 
         if len(data) > 0:
-            dbh.save_data_for_last_date(data, 'history.shares_list_on_date', 'SETTLEDATE')
+            dbh.save_data_simple(data, 'history.shares_list_on_date')
+            # dbh.save_data_for_last_date(data, 'history.shares_list_on_date', 'SETTLEDATE')
 
         # df = pd.DataFrame(data)
         # df.set_index("SECID", inplace=True)

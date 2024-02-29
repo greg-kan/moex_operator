@@ -8,6 +8,30 @@ from datetime import datetime
 logger = Logger('db_helper', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
 
+def save_data_simple(data, str_table) -> int:
+    inserted_rows: int = 0
+    conn = None
+    try:
+        params = st.DB_PARAMS
+
+        logger.info('Connecting to the PostgreSQL database...')
+
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+
+        logger.info(f'Storing {len(data)} records to table {str_table}')
+        inserted_rows = save_list_dicts_to_table(conn, cur, data, str_table)
+
+        cur.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'Error: {error}')
+    finally:
+        if conn is not None:
+            conn.close()
+            logger.info('Database connection closed.')
+        return inserted_rows
+
+
 def save_data_for_last_date(data, str_table, str_date_field) -> int:
     inserted_rows: int = 0
     conn = None
