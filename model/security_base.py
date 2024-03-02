@@ -191,10 +191,6 @@ class SecuritiesBase:
         else:
             logger.info(f"{self.class_name}.store_data_to_db(): No {self.class_name} records loaded from internet")
 
-    def test_sp(self):
-        res = dbh.store_list_dicts_to_table_json(self.data, self.db_table)
-        print(res)
-
 
 class BondsBase(SecuritiesBase):
     def __init__(self):

@@ -9,7 +9,9 @@ logger = Logger('security_history', st.APPLICATION_LOG, write_to_stdout=st.DEBUG
 SHARES_HISTORY_BOARD = "TQBR"
 SHARES_HISTORY_REQUEST_URL = (f'https://iss.moex.com/iss/history/engines/'
                               f'stock/markets/shares/boards/{SHARES_HISTORY_BOARD}/securities.json')
-SHARES_HISTORY_DB_TABLE = 'history.stock_shares_securities_history'
+SHARES_HISTORY_DB_TABLE_OLD = 'history.stock_shares_securities_history'
+SHARES_HISTORY_DB_TABLE = 'history.shares_history'
+SHARES_HISTORY_STORED_PROC = 'history.f_save_shares_history'
 
 SHARES_HISTORY_DB_TABLE_COLUMNS = ["BOARDID", "TRADEDATE", "SHORTNAME", "SECID", "NUMTRADES",
                                    "VALUE", "OPEN", "LOW", "HIGH", "LEGALCLOSEPRICE", "WAPRICE",
@@ -18,7 +20,9 @@ SHARES_HISTORY_DB_TABLE_COLUMNS = ["BOARDID", "TRADEDATE", "SHORTNAME", "SECID",
                                    "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR"]
 
 BONDS_HISTORY_REQUEST_URL = 'https://iss.moex.com/iss/history/engines/stock/markets/bonds/securities.json'
-BONDS_HISTORY_DB_TABLE = 'history.stock_bonds_securities_history'
+BONDS_HISTORY_DB_TABLE_OLD = 'history.stock_bonds_securities_history'
+BONDS_HISTORY_DB_TABLE = 'history.bonds_history'
+BONDS_HISTORY_STORED_PROC = 'history.f_save_bonds_history'
 
 SHARES_HISTORY_METADATA = {
     "BOARDID": {"type": "string", "bytes": 12, "max_size": 0},
@@ -95,6 +99,7 @@ class SecuritiesHistory:
         self.class_name = self.__class__.__name__
         self.request_url: str = ''
         self.db_table: str = ''
+        self.stored_proc: str = ''
         self.db_table_columns: list[str] = []
 
     async def load_data_from_internet_async(self):
@@ -114,6 +119,28 @@ class SecuritiesHistory:
             logger.info(f"{self.class_name}.store_data_to_db(): {len(self.data)} "
                         f"{self.class_name} records loaded from internet")
 
+            result = dbh.store_history_to_db(self.data, self.db_table, self.stored_proc)
+
+            if result is None:
+                logger.error(f"{self.class_name}.store_data_to_db(): DB Error occurred. "
+                             f"No new {self.class_name} records stored. All data length = {len(self.data)}")
+                return
+
+            if result > 0:
+                logger.info(f"{self.class_name}.store_data_to_db(): {result} "
+                            f"new {self.class_name} records stored. All data length = {len(self.data)}")
+            elif result == 0:
+                logger.info(f"{self.class_name}.store_data_to_db(): No "
+                            f"new {self.class_name} records stored. All data length = {len(self.data)}")
+            else:
+                logger.error(f"{self.class_name}.store_data_to_db(): Error. Error code = {result}. "
+                             f"All data length = {len(self.data)}")
+
+    def store_data_to_db_old(self):
+        if self.data and len(self.data) > 0:
+            logger.info(f"{self.class_name}.store_data_to_db(): {len(self.data)} "
+                        f"{self.class_name} records loaded from internet")
+
             inserted_rows = dbh.save_data_for_last_date(self.data, self.db_table, 'TRADEDATE')
 
             logger.info(f"{self.class_name}.store_data_to_db(): {inserted_rows} "
@@ -125,6 +152,7 @@ class SharesHistory(SecuritiesHistory):
         super().__init__()
         self.request_url: str = SHARES_HISTORY_REQUEST_URL
         self.db_table: str = SHARES_HISTORY_DB_TABLE
+        self.stored_proc: str = SHARES_HISTORY_STORED_PROC
         # self.db_table_columns: list[str] = SHARES_HISTORY_DB_TABLE_COLUMNS
 
 
@@ -133,4 +161,5 @@ class BondsHistory(SecuritiesHistory):
         super().__init__()
         self.request_url: str = BONDS_HISTORY_REQUEST_URL
         self.db_table: str = BONDS_HISTORY_DB_TABLE
+        self.stored_proc: str = BONDS_HISTORY_STORED_PROC
         # self.db_table_columns: list[str] =

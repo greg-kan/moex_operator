@@ -111,19 +111,6 @@ def save_list_dicts_to_table(connection, cursor, data, str_table, cur_time=None)
     return cursor.rowcount
 
 
-def save_list_dicts_to_table_json(connection, cursor, json_data, str_table):
-
-    cursor.execute("select reference.save_json_to_table(%s, %s, %s);", (str_table, json_data, '2024-02-18 15:56:40.632'))
-    connection.commit()
-    result = cursor.fetchone()[0]
-
-    # query = ("SELECT {} from {} {};".format(fields, str_table, condition_str))
-    # # print(query)
-
-
-    return result
-
-
 def read_list_dicts_from_table_by_condition(cur,
                                             str_table: str,
                                             fields_list: list[str] | None = None,
@@ -179,7 +166,7 @@ def store_list_dicts_to_table(data, str_table, cur_time=None):  # remove cur_tim
             logger.info('Database connection closed.')
 
 
-def store_list_dicts_to_table_json(data, str_table):
+def store_history_to_db(data, str_table, str_stored_proc) -> int | None:
     conn = None
     try:
         params = st.DB_PARAMS
@@ -189,11 +176,15 @@ def store_list_dicts_to_table_json(data, str_table):
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
 
-        logger.info(f'Storing {len(data)} records to table {str_table}')
+        logger.info(f'Storing {len(data)} records to table {str_table} by {str_stored_proc}')
 
-        json_data = json.dumps(data)
+        data_lower_cased_keys = [{k.lower(): v for k, v in elem.items()} for elem in data]
 
-        result = save_list_dicts_to_table_json(conn, cur, json_data, str_table)
+        json_data = json.dumps(data_lower_cased_keys)
+
+        cur.execute(f"select {str_stored_proc}(%s);", (json_data,))
+        conn.commit()
+        result = cur.fetchone()[0]
 
         cur.close()
 
