@@ -19,6 +19,7 @@ import settings as st
 from logger import Logger
 from model import BondsBase, SharesBase
 from model import SharesHistory, BondsHistory
+from model import SharesMain
 
 
 logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
@@ -209,6 +210,9 @@ def test_request_by_client(group: str, limit: str, start: str):
 
 if __name__ == "__main__":
     logger.info("Routine started")
+
+    # shares_main1 = SharesMain()
+    # asyncio.run(shares_main1.load_data_from_internet_async())
 
     # Получить и сохранить историю торгов для всех акций во всех режимах торгов (сейчас TQBR) за последнюю дату
     shares_history1 = SharesHistory()
