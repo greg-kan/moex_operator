@@ -166,7 +166,7 @@ def store_list_dicts_to_table(data, str_table, cur_time=None):  # remove cur_tim
             logger.info('Database connection closed.')
 
 
-def store_history_to_db(data, str_table, str_stored_proc) -> int | None:
+def store_history_to_db(data, str_table, str_stored_proc) -> int | str | None:
     conn = None
     try:
         params = st.DB_PARAMS

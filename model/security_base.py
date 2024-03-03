@@ -10,20 +10,13 @@ from datetime import datetime
 
 logger = Logger('security_base', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
 
-# BONDS_BASE_FILTER_GROUP = "stock_bonds"
-# BONDS_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
-#                           f'securities.json?group_by=group&group_by_filter={BONDS_BASE_FILTER_GROUP}')
-
 BONDS_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
                           f'securities.json?engine=stock&market=bonds')
-BONDS_BASE_DB_TABLE = 'reference.bonds_base'
+BONDS_BASE_DB_TABLE = 'reference.bonds_base1'
+BONDS_BASE_STORED_PROC = 'reference.f_save_bonds_base'
 BONDS_BASE_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", "isin", "is_traded",
-                                  "emitent_id", "emitent_title", "emitent_inn", "emitent_okpo", "gosreg",
-                                  "type", "group", "primary_boardid", "marketprice_boardid"]
-
-# SHARES_BASE_FILTER_GROUP = "stock_shares"
-# SHARES_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
-#                            f'securities.json?group_by=group&group_by_filter={SHARES_BASE_FILTER_GROUP}')
+                               "emitent_id", "emitent_title", "emitent_inn", "emitent_okpo", "gosreg",
+                               "type", "group", "primary_boardid", "marketprice_boardid"]
 
 SHARES_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
                            f'securities.json?engine=stock&market=shares')
@@ -58,6 +51,7 @@ class SecuritiesBase:
         self.class_name = self.__class__.__name__
         self.request_url: str = ''
         self.db_table: str = ''
+        self.stored_proc: str = ''
         self.db_table_columns: list[str] = []
 
     async def load_data_from_internet_async(self):
@@ -175,14 +169,31 @@ class SecuritiesBase:
             logger.info(f"{self.class_name}.store_data_to_db(): No {self.class_name} records loaded from internet")
 
     def store_data_to_db_sp(self):
-        pass
-    
+
+        if self.data and len(self.data) > 0:
+            logger.info(f"{self.class_name}.store_data_to_db_sp(): {len(self.data)} "  # TODO: remove _sp
+                        f"{self.class_name} records loaded from internet")
+
+            result = dbh.store_history_to_db(self.data, self.db_table, self.stored_proc)  # TODO: change proc name
+
+            if result is None:
+                logger.error(f"{self.class_name}.store_data_to_db_sp(): DB Error occurred. "
+                             f"No new {self.class_name} records stored. All data length = {len(self.data)}")
+                return
+            elif result == '-1':
+                logger.error(f"{self.class_name}.store_data_to_db_sp(): Error. Error code = {result}. "
+                             f"All data length = {len(self.data)}")
+            else:
+                logger.info(f"{self.class_name}.store_data_to_db_sp(): Stored proc reports: {result}. "
+                            f"All data length = {len(self.data)}")
+
 
 class BondsBase(SecuritiesBase):
     def __init__(self):
         super().__init__()
         self.request_url: str = BONDS_BASE_REQUEST_URL
         self.db_table: str = BONDS_BASE_DB_TABLE
+        self.stored_proc: str = BONDS_BASE_STORED_PROC
         self.db_table_columns: list[str] = BONDS_BASE_DB_TABLE_COLUMNS
 
 
