@@ -176,6 +176,3 @@ $$
 LANGUAGE plpgsql;
 
 
-
-
-

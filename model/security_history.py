@@ -9,7 +9,6 @@ logger = Logger('security_history', st.APPLICATION_LOG, write_to_stdout=st.DEBUG
 SHARES_HISTORY_BOARD = "TQBR"
 SHARES_HISTORY_REQUEST_URL = (f'https://iss.moex.com/iss/history/engines/'
                               f'stock/markets/shares/boards/{SHARES_HISTORY_BOARD}/securities.json')
-SHARES_HISTORY_DB_TABLE_OLD = 'history.stock_shares_securities_history'
 SHARES_HISTORY_DB_TABLE = 'history.shares_history'
 SHARES_HISTORY_STORED_PROC = 'history.f_save_shares_history'
 
@@ -20,7 +19,6 @@ SHARES_HISTORY_DB_TABLE_COLUMNS = ["BOARDID", "TRADEDATE", "SHORTNAME", "SECID",
                                    "TRADINGSESSION", "CURRENCYID", "TRENDCLSPR"]
 
 BONDS_HISTORY_REQUEST_URL = 'https://iss.moex.com/iss/history/engines/stock/markets/bonds/securities.json'
-BONDS_HISTORY_DB_TABLE_OLD = 'history.stock_bonds_securities_history'
 BONDS_HISTORY_DB_TABLE = 'history.bonds_history'
 BONDS_HISTORY_STORED_PROC = 'history.f_save_bonds_history'
 

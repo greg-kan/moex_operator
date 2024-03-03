@@ -51,23 +51,6 @@ SECURITIES_BASE_METADATA = {
 }
 
 
-class BondInitial:
-    def __init__(self, bond: dict):
-        self.bond: dict = bond
-
-    def set(self, bond: dict):
-        self.bond = bond
-
-    def get(self):
-        return self.bond
-
-    def set_attribute(self, name: str, value: str):
-        self.bond[name] = value
-
-    def get_attribute(self, name: str):
-        return self.bond[name]
-
-
 class SecuritiesBase:
     def __init__(self):
         self.metadata: dict[list[dict[str, dict]]] | None = None
@@ -191,6 +174,9 @@ class SecuritiesBase:
         else:
             logger.info(f"{self.class_name}.store_data_to_db(): No {self.class_name} records loaded from internet")
 
+    def store_data_to_db_sp(self):
+        pass
+    
 
 class BondsBase(SecuritiesBase):
     def __init__(self):
