@@ -166,7 +166,7 @@ def store_list_dicts_to_table(data, str_table, cur_time=None):  # remove cur_tim
             logger.info('Database connection closed.')
 
 
-def store_history_to_db(data, str_table, str_stored_proc) -> int | str | None:
+def store_to_db_by_sp(data, str_table, str_stored_proc) -> int | str | None:
     conn = None
     try:
         params = st.DB_PARAMS
@@ -176,7 +176,8 @@ def store_history_to_db(data, str_table, str_stored_proc) -> int | str | None:
         conn = psycopg2.connect(**params)
         cur = conn.cursor()
 
-        logger.info(f'Storing {len(data)} records to table {str_table} by {str_stored_proc}')
+        logger.info(f'{len(data)} records received. About to store (part of) them to '
+                    f'table {str_table} by {str_stored_proc}')
 
         data_lower_cased_keys = [{k.lower(): v for k, v in elem.items()} for elem in data]
 

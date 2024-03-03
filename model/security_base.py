@@ -12,7 +12,7 @@ logger = Logger('security_base', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MO
 
 BONDS_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
                           f'securities.json?engine=stock&market=bonds')
-BONDS_BASE_DB_TABLE = 'reference.bonds_base1'
+BONDS_BASE_DB_TABLE = 'reference.bonds_base'
 BONDS_BASE_STORED_PROC = 'reference.f_save_bonds_base'
 BONDS_BASE_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", "isin", "is_traded",
                                "emitent_id", "emitent_title", "emitent_inn", "emitent_okpo", "gosreg",
@@ -21,6 +21,7 @@ BONDS_BASE_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", 
 SHARES_BASE_REQUEST_URL = (f'https://iss.moex.com/iss/'
                            f'securities.json?engine=stock&market=shares')
 SHARES_BASE_DB_TABLE = 'reference.shares_base'
+SHARES_BASE_STORED_PROC = 'reference.f_save_shares_base'
 SHARES_BASE_DB_TABLE_COLUMNS = ["id", "secid", "shortname", "regnumber", "name", "isin", "is_traded",
                                 "emitent_id", "emitent_title", "emitent_inn", "emitent_okpo", "gosreg",
                                 "type", "group", "primary_boardid", "marketprice_boardid"]
@@ -82,7 +83,7 @@ class SecuritiesBase:
             self.metadata = data["securities"][0]["metadata"]
             logger.info(f"{self.class_name}.load_metadata_from_internet(): {self.class_name} metadata loaded")
 
-    def store_data_to_db(self):
+    def store_data_to_db_old(self):
         cur_time = datetime.now()  # remove it after creating postgres function
 
         def compare_records(list1: list[dict], list2: list[dict]) -> list[dict]:
@@ -168,23 +169,22 @@ class SecuritiesBase:
         else:
             logger.info(f"{self.class_name}.store_data_to_db(): No {self.class_name} records loaded from internet")
 
-    def store_data_to_db_sp(self):
-
+    def store_data_to_db(self):
         if self.data and len(self.data) > 0:
-            logger.info(f"{self.class_name}.store_data_to_db_sp(): {len(self.data)} "  # TODO: remove _sp
+            logger.info(f"{self.class_name}.store_data_to_db(): {len(self.data)} "
                         f"{self.class_name} records loaded from internet")
 
-            result = dbh.store_history_to_db(self.data, self.db_table, self.stored_proc)  # TODO: change proc name
+            result = dbh.store_to_db_by_sp(self.data, self.db_table, self.stored_proc)
 
             if result is None:
-                logger.error(f"{self.class_name}.store_data_to_db_sp(): DB Error occurred. "
+                logger.error(f"{self.class_name}.store_data_to_db(): DB Error occurred. "
                              f"No new {self.class_name} records stored. All data length = {len(self.data)}")
                 return
             elif result == '-1':
-                logger.error(f"{self.class_name}.store_data_to_db_sp(): Error. Error code = {result}. "
+                logger.error(f"{self.class_name}.store_data_to_db(): Error. Error code = {result}. "
                              f"All data length = {len(self.data)}")
             else:
-                logger.info(f"{self.class_name}.store_data_to_db_sp(): Stored proc reports: {result}. "
+                logger.info(f"{self.class_name}.store_data_to_db(): Stored proc reports: {result}. "
                             f"All data length = {len(self.data)}")
 
 
@@ -202,4 +202,5 @@ class SharesBase(SecuritiesBase):
         super().__init__()
         self.request_url: str = SHARES_BASE_REQUEST_URL
         self.db_table: str = SHARES_BASE_DB_TABLE
+        self.stored_proc: str = SHARES_BASE_STORED_PROC
         self.db_table_columns: list[str] = SHARES_BASE_DB_TABLE_COLUMNS

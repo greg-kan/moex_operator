@@ -117,7 +117,7 @@ class SecuritiesHistory:
             logger.info(f"{self.class_name}.store_data_to_db(): {len(self.data)} "
                         f"{self.class_name} records loaded from internet")
 
-            result = dbh.store_history_to_db(self.data, self.db_table, self.stored_proc)
+            result = dbh.store_to_db_by_sp(self.data, self.db_table, self.stored_proc)
 
             if result is None:
                 logger.error(f"{self.class_name}.store_data_to_db(): DB Error occurred. "

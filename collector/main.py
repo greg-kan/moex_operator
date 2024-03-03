@@ -227,7 +227,6 @@ if __name__ == "__main__":
     # Получить и сохранить перечень облигаций
     bonds_base1 = BondsBase()
     asyncio.run(bonds_base1.load_data_from_internet_async())
-    # bonds_base1.test_sp()
     bonds_base1.store_data_to_db()
 
     time.sleep(3)

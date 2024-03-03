@@ -50,33 +50,33 @@ begin
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
          "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
     from temp_bonds_base tbb
-   where tbb."secid" in (select "secid" from reference.bonds_base1)
+   where tbb."secid" in (select "secid" from reference.bonds_base)
  
   except
 
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
          "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
-    from reference.bonds_base1 bb
+    from reference.bonds_base bb
    where bb."secid" in (select "secid" from temp_bonds_base)
      and bb.updatetimestamp is null
   );
   
 ---------part two
-  update reference.bonds_base1
+  update reference.bonds_base
      set updatetimestamp = current_timestamp
    where "secid" in (select "secid" from temp_bonds_base_modified);
   
-  insert into reference.bonds_base1
+  insert into reference.bonds_base
   select * from temp_bonds_base_modified;
      
   GET DIAGNOSTICS row_cnt_modified = ROW_COUNT;
  
 ---------part three
-  insert into reference.bonds_base1
+  insert into reference.bonds_base
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
          "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
     from temp_bonds_base
-   where "secid" not in (select "secid" from reference.bonds_base1);  
+   where "secid" not in (select "secid" from reference.bonds_base);  
     
   GET DIAGNOSTICS row_cnt_new = ROW_COUNT;
  
@@ -99,6 +99,20 @@ select * from reference.bonds_base;
 
 
 
+select * from reference.bonds_base1; --7766
+
+delete from reference.bonds_base1  --3426
+ where emitent_id between 1000 and 2000;
+
+update reference.bonds_base1 --14
+set shortname = 'TEMPNAME'
+where emitent_id = 2003;
+
+
+select * from reference.bonds_base1
+ where emitent_id = 2003
+ order by secid, updatetimestamp;
+
 --truncate table history.stock_shares_securities_history;
 --truncate table history.shares_list_on_date;
 --truncate table reference.bonds_initial;
@@ -113,14 +127,7 @@ select *,
  where a.cnt > 1;
 
 select * from reference.bonds_base;
-https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json
-https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQCB/securities.json
-select distinct primary_boardid from reference.bonds_base;
-select distinct marketprice_boardid from reference.bonds_base;
 
-primary_boardid
-marketprice_boardid
+truncate table reference.shares_base;
 
-select * from history.shares_list_on_date
-  where secid  = 'SBER';
 

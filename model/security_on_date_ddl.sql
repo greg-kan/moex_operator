@@ -77,3 +77,14 @@ create table reference.bonds_list_on_date (
  FACEVALUEONSETTLEDATE double precision,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
+
+https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json
+https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQCB/securities.json
+select distinct primary_boardid from reference.bonds_base;
+select distinct marketprice_boardid from reference.bonds_base;
+
+primary_boardid
+marketprice_boardid
+
+select * from history.shares_list_on_date
+  where secid  = 'SBER';
