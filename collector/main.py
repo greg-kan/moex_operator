@@ -211,8 +211,12 @@ def test_request_by_client(group: str, limit: str, start: str):
 if __name__ == "__main__":
     logger.info("Routine started")
 
-    # shares_main1 = SharesMain()
-    # asyncio.run(shares_main1.load_data_from_internet_async())
+    # Получить и сохранить основные данные по акциям
+    shares_main1 = SharesMain()
+    asyncio.run(shares_main1.load_data_from_internet_async())
+    shares_main1.store_securities_to_db()
+
+    time.sleep(3)
 
     # Получить и сохранить историю торгов для всех акций во всех режимах торгов (сейчас TQBR) за последнюю дату
     shares_history1 = SharesHistory()
@@ -240,9 +244,9 @@ if __name__ == "__main__":
     asyncio.run(shares_base1.load_data_from_internet_async())
     shares_base1.store_data_to_db()
 
-    time.sleep(3)
+    # time.sleep(3)
 
-    # Получить перечень акций на следующую дату ??? Короче, рыночные данные, сейчас ограничены TQBR
-    asyncio.run(all_shares_all_boards_list_on_current_date())
+    # # Получить перечень акций на следующую дату ??? Короче, рыночные данные, сейчас ограничены TQBR
+    # asyncio.run(all_shares_all_boards_list_on_current_date())
 
     logger.info("Routine finished")

@@ -1,6 +1,6 @@
---drop table history.shares_list_on_date;
---truncate table history.shares_list_on_date;
-create table history.shares_list_on_date (
+--CREATE SCHEMA main;
+--drop table main.shares_main_securities;
+create table main.shares_main_securities (
  secid varchar(64),
  boardid varchar(32),
  shortname varchar(256),
@@ -31,6 +31,10 @@ create table history.shares_list_on_date (
  inserttimestamp timestamp DEFAULT current_timestamp
 );
 
+
+create table main.shares_main_marketdata (
+
+);
 
 --drop table reference.bonds_list_on_date;
 --truncate table reference.bonds_list_on_date;

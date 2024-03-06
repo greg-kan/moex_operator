@@ -37,27 +37,53 @@ class SharesMain:
             self.marketdata_data = data['marketdata']
             self.dataversion_data = data['dataversion']
 
-        df = pd.DataFrame(self.securities_data)
-        df.set_index("SECID", inplace=True)
-        print(df.head(10), "\n")
-        print(df.tail(10), "\n")
-        df.info()
-        print(len(df), "\n")
+        # df = pd.DataFrame(self.securities_data)
+        # df.set_index("SECID", inplace=True)
+        # print(df.head(10), "\n")
+        # print(df.tail(10), "\n")
+        # df.info()
+        # print(len(df), "\n")
 
         logger.info(f"{self.class_name}.load_data_from_internet_async(): "
                     f"{len(self.securities_data)} {self.class_name} securities records loaded")
 
-
-        df = pd.DataFrame(self.marketdata_data)
-        df.set_index("SECID", inplace=True)
-        print(df.head(10), "\n")
-        print(df.tail(10), "\n")
-        df.info()
-        print(len(df), "\n")
+        # df = pd.DataFrame(self.marketdata_data)
+        # df.set_index("SECID", inplace=True)
+        # print(df.head(10), "\n")
+        # print(df.tail(10), "\n")
+        # df.info()
+        # print(len(df), "\n")
 
         logger.info(f"{self.class_name}.load_data_from_internet_async(): "
                     f"{len(self.marketdata_data)} {self.class_name} marketdata records loaded")
 
-        df = pd.DataFrame(self.dataversion_data)
-        print(df, "\n")
-        df.info()
+        # df = pd.DataFrame(self.dataversion_data)
+        # print(df, "\n")
+        # df.info()
+
+    def store_securities_to_db(self):
+        if self.securities_data and len(self.securities_data) > 0:
+            logger.info(f"{self.class_name}.store_securities_to_db(): Length of the data = "
+                        f"{len(self.securities_data)}")
+
+            result = dbh.save_data_simple(self.securities_data, 'main.shares_main_securities')
+
+            if result > 0:
+                logger.info(f"{self.class_name}.store_securities_to_db(): {result} "
+                            f"new {self.class_name} records stored. All data length = {len(self.securities_data)}")
+            else:
+                logger.error(f"{self.class_name}.store_securities_to_db(): Error. Error code = {result}. "
+                             f"All data length = {len(self.securities_data)}")
+
+        else:
+            logger.info(f"{self.class_name}.store_securities_to_db(): No data to store")
+
+    def store_marketdata_to_db(self):
+        if self.marketdata_data and len(self.marketdata_data) > 0:
+            logger.info(f"{self.class_name}.store_marketdata_to_db: Length of the data = "
+                        f"{len(self.marketdata_data)}")
+
+            # result = dbh.save_data_simple(self.marketdata_data, '')
+
+        else:
+            logger.info(f"{self.class_name}.marketdata_to_db(): No data to store")

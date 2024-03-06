@@ -24,6 +24,7 @@ def save_data_simple(data, str_table) -> int:
 
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
+        inserted_rows = -1
         logger.error(f'Error: {error}')
     finally:
         if conn is not None:
