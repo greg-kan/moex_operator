@@ -1,5 +1,6 @@
 --CREATE SCHEMA main;
 --drop table main.shares_main_securities;
+--truncate table main.shares_main_securities;
 create table main.shares_main_securities (
  secid varchar(64),
  boardid varchar(32),
@@ -31,11 +32,74 @@ create table main.shares_main_securities (
  inserttimestamp timestamp DEFAULT current_timestamp
 );
 
-
+--truncate table main.shares_main_marketdata;
 create table main.shares_main_marketdata (
-
+ secid varchar(64),
+ boardid varchar(32),
+ bid numeric(19,6),
+ biddepth integer,
+ offer numeric(19,6),
+ offerdepth integer,
+ spread numeric(19,6),
+ biddeptht integer,
+ offerdeptht integer,
+ open numeric(19,6),
+ low numeric(19,6),
+ high numeric(19,6),
+ last numeric(19,6),
+ lastchange numeric(19,6),
+ lastchangeprcnt numeric(19,6),
+ qty integer,
+ value numeric(19,6),
+ value_usd numeric(19,6),
+ waprice numeric(19,6),
+ lastcngtolastwaprice numeric(19,6),
+ waptoprevwapriceprcnt numeric(19,6),
+ waptoprevwaprice numeric(19,6),
+ closeprice numeric(19,6),
+ marketpricetoday numeric(19,6),
+ marketprice numeric(19,6),
+ lasttoprevprice numeric(19,6),
+ numtrades integer,
+ voltoday bigint,
+ valtoday bigint,
+ valtoday_usd bigint,
+ etfsettleprice numeric(19,6),
+ tradingstatus varchar(8),
+ updatetime time,
+ lastbid numeric(19,6),
+ lastoffer numeric(19,6),
+ lcloseprice numeric(19,6),
+ lcurrentprice numeric(19,6),
+ marketprice2 numeric(19,6),
+ numbids integer,
+ numoffers integer,
+ change numeric(19,6),
+ "time" time,
+ highbid numeric(19,6),
+ lowoffer numeric(19,6),
+ priceminusprevwaprice numeric(19,6),
+ openperiodprice numeric(19,6),
+ seqnum bigint,
+ systime timestamp without time zone,
+ closingauctionprice numeric(19,6),
+ closingauctionvolume  numeric(19,6),
+ issuecapitalization numeric(19,6),
+ issuecapitalization_updatetime time,
+ etfsettlecurrency varchar(32),
+ valtoday_rur bigint,
+ tradingsession varchar(8),
+ trendissuecapitalization numeric(19,6)
 );
 
+--truncate table main.shares_main_dataversion;
+--drop table main.shares_main_dataversion;
+create table main.shares_main_dataversion (
+-- session_num serial,
+ data_version integer,
+ seqnum bigint
+);
+ 
 --drop table reference.bonds_list_on_date;
 --truncate table reference.bonds_list_on_date;
 create table reference.bonds_list_on_date (

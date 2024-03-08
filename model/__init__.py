@@ -3,3 +3,4 @@ from model.security_base import SharesBase
 from model.security_history import SecuritiesHistory
 from model.security_history import SharesHistory, BondsHistory
 from model.security_main import SharesMain
+from model.system import Session

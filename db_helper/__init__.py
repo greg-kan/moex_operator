@@ -6,3 +6,4 @@ from .db_helper import get_distinct_one_field_values_from_table
 from .db_helper import update_db_table_records_by_ids
 from .db_helper import store_to_db_by_sp
 from .db_helper import save_data_simple
+from .db_helper import exec_sp_wo_params

@@ -20,6 +20,7 @@ from logger import Logger
 from model import BondsBase, SharesBase
 from model import SharesHistory, BondsHistory
 from model import SharesMain
+from model import Session
 
 
 logger = Logger('main', st.APPLICATION_LOG, write_to_stdout=st.DEBUG_MODE).get()
@@ -208,13 +209,26 @@ def test_request_by_client(group: str, limit: str, start: str):
         # print(df.loc[['SBER']])
 
 
-if __name__ == "__main__":
+def routine():
     logger.info("Routine started")
 
+    # Инициировать сессию и получить session_number
+    session = Session()
+    session_number = session.get_number()
+
+    if session_number == 0:
+        logger.error("Session was not initialized")
+        return
+
+    time.sleep(3)
+
     # Получить и сохранить основные данные по акциям
-    shares_main1 = SharesMain()
+    shares_main1 = SharesMain(session_number)
     asyncio.run(shares_main1.load_data_from_internet_async())
-    shares_main1.store_securities_to_db()
+
+    shares_main1.store_data_to_db(shares_main1.securities_data, 'securities')
+    shares_main1.store_data_to_db(shares_main1.marketdata_data, 'marketdata')
+    shares_main1.store_data_to_db(shares_main1.dataversion_data, 'dataversion')
 
     time.sleep(3)
 
@@ -244,9 +258,8 @@ if __name__ == "__main__":
     asyncio.run(shares_base1.load_data_from_internet_async())
     shares_base1.store_data_to_db()
 
-    # time.sleep(3)
-
-    # # Получить перечень акций на следующую дату ??? Короче, рыночные данные, сейчас ограничены TQBR
-    # asyncio.run(all_shares_all_boards_list_on_current_date())
-
     logger.info("Routine finished")
+
+
+if __name__ == "__main__":
+    routine()

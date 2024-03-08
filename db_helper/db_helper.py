@@ -167,6 +167,32 @@ def store_list_dicts_to_table(data, str_table, cur_time=None):  # remove cur_tim
             logger.info('Database connection closed.')
 
 
+def exec_sp_wo_params(str_stored_proc) -> str | None:
+    conn = None
+    try:
+        params = st.DB_PARAMS
+
+        logger.info('Connecting to the PostgreSQL database...')
+
+        conn = psycopg2.connect(**params)
+        cur = conn.cursor()
+
+        logger.info(f'About to execute stored proc {str_stored_proc}')
+
+        cur.execute(f"select {str_stored_proc}();")
+        conn.commit()
+        result = cur.fetchone()[0]
+
+        return result
+    except (Exception, psycopg2.DatabaseError) as error:
+        logger.error(f'Error: {error}')
+        return None
+    finally:
+        if conn is not None:
+            conn.close()
+            logger.info('Database connection closed.')
+
+
 def store_to_db_by_sp(data, str_table, str_stored_proc) -> int | str | None:
     conn = None
     try:

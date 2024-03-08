@@ -15,18 +15,21 @@ SHARES_MAIN_BOARD = "TQBR"
 SHARES_MAIN_REQUEST_URL = (f'https://iss.moex.com/iss/engines/stock/markets/shares/boards/'
                            f'{SHARES_MAIN_BOARD}/securities.json')
 
+SHARES_MAIN_SECURITIES_DB_TABLE = 'main.shares_main_securities'
+SHARES_MAIN_MARKETDATA_DB_TABLE = 'main.shares_main_marketdata'
+SHARES_MAIN_DATAVERSION_DB_TABLE = 'main.shares_main_dataversion'
+
 
 class SharesMain:
-    def __init__(self):
+    def __init__(self, session_number):
         # self.metadata: dict[list[dict[str, dict]]] | None = None
         self.securities_data: list[dict] | None = None
         self.marketdata_data: list[dict] | None = None
         self.dataversion_data: list[dict] | None = None
         self.class_name = self.__class__.__name__
         self.request_url: str = SHARES_MAIN_REQUEST_URL
-        # self.db_table: str = ''
-        # self.stored_proc: str = ''
-        # self.db_table_columns: list[str] = []
+        self.db_table: str = ''
+        self.session_number: int = session_number
 
     async def load_data_from_internet_async(self):
         arguments = {}
@@ -37,53 +40,37 @@ class SharesMain:
             self.marketdata_data = data['marketdata']
             self.dataversion_data = data['dataversion']
 
-        # df = pd.DataFrame(self.securities_data)
-        # df.set_index("SECID", inplace=True)
-        # print(df.head(10), "\n")
-        # print(df.tail(10), "\n")
-        # df.info()
-        # print(len(df), "\n")
-
         logger.info(f"{self.class_name}.load_data_from_internet_async(): "
                     f"{len(self.securities_data)} {self.class_name} securities records loaded")
-
-        # df = pd.DataFrame(self.marketdata_data)
-        # df.set_index("SECID", inplace=True)
-        # print(df.head(10), "\n")
-        # print(df.tail(10), "\n")
-        # df.info()
-        # print(len(df), "\n")
 
         logger.info(f"{self.class_name}.load_data_from_internet_async(): "
                     f"{len(self.marketdata_data)} {self.class_name} marketdata records loaded")
 
-        # df = pd.DataFrame(self.dataversion_data)
-        # print(df, "\n")
-        # df.info()
+        logger.info(f"{self.class_name}.load_data_from_internet_async(): "
+                    f"{len(self.dataversion_data)} {self.class_name} dataversion records loaded")
 
-    def store_securities_to_db(self):
-        if self.securities_data and len(self.securities_data) > 0:
-            logger.info(f"{self.class_name}.store_securities_to_db(): Length of the data = "
-                        f"{len(self.securities_data)}")
+    def store_data_to_db(self, data: list[dict], str_data):
+        if data and len(data) > 0:
 
-            result = dbh.save_data_simple(self.securities_data, 'main.shares_main_securities')
+            if str_data == 'securities':
+                self.db_table = SHARES_MAIN_SECURITIES_DB_TABLE
+            elif str_data == 'marketdata':
+                self.db_table = SHARES_MAIN_MARKETDATA_DB_TABLE
+            elif str_data == 'dataversion':
+                self.db_table = SHARES_MAIN_DATAVERSION_DB_TABLE
+
+            logger.info(f"{self.class_name}.store_data_to_db: Length of the {str_data}_data = "
+                        f"{len(data)}")
+
+            result = dbh.save_data_simple(data, self.db_table)
 
             if result > 0:
-                logger.info(f"{self.class_name}.store_securities_to_db(): {result} "
-                            f"new {self.class_name} records stored. All data length = {len(self.securities_data)}")
+                logger.info(f"{self.class_name}.store_data_to_db(): {result} "
+                            f"new {self.class_name} {str_data}_data records stored to table {self.db_table} "
+                            f"All {str_data}_data length = {len(data)}")
             else:
-                logger.error(f"{self.class_name}.store_securities_to_db(): Error. Error code = {result}. "
-                             f"All data length = {len(self.securities_data)}")
+                logger.error(f"{self.class_name}.store_data_to_db(): Error. Error code = {result}. "
+                             f"All {str_data}_data length = {len(data)}")
 
         else:
-            logger.info(f"{self.class_name}.store_securities_to_db(): No data to store")
-
-    def store_marketdata_to_db(self):
-        if self.marketdata_data and len(self.marketdata_data) > 0:
-            logger.info(f"{self.class_name}.store_marketdata_to_db: Length of the data = "
-                        f"{len(self.marketdata_data)}")
-
-            # result = dbh.save_data_simple(self.marketdata_data, '')
-
-        else:
-            logger.info(f"{self.class_name}.marketdata_to_db(): No data to store")
+            logger.info(f"{self.class_name}.store_data_to_db(): No {str_data}_data to store")
