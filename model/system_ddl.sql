@@ -8,12 +8,10 @@ create table sys.session (
 
 
 CREATE OR REPLACE FUNCTION sys.f_set_session()
--- RETURNS integer
  returns record
  LANGUAGE plpgsql
 AS $function$
 DECLARE 
---  result integer := 0;
   result record;
 begin
   insert into sys.session (session_time) values (current_timestamp);

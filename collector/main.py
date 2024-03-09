@@ -20,6 +20,7 @@ from logger import Logger
 from model import BondsBase, SharesBase
 from model import SharesHistory, BondsHistory
 from model import SharesMain
+from model import BondsMain
 from model import Session
 
 
@@ -222,6 +223,14 @@ def routine():
 
     time.sleep(3)
 
+    # Получить и сохранить основные данные по облигациям
+    bonds_main1 = BondsMain(session_number)
+    asyncio.run(bonds_main1.load_data_from_internet_async())
+
+    bonds_main1.store_data_to_db(bonds_main1.securities_data, 'securities')
+
+    time.sleep(3)
+
     # Получить и сохранить основные данные по акциям
     shares_main1 = SharesMain(session_number)
     asyncio.run(shares_main1.load_data_from_internet_async())
@@ -232,17 +241,17 @@ def routine():
 
     time.sleep(3)
 
-    # Получить и сохранить историю торгов для всех акций во всех режимах торгов (сейчас TQBR) за последнюю дату
-    shares_history1 = SharesHistory()
-    asyncio.run(shares_history1.load_data_from_internet_async())
-    shares_history1.store_data_to_db()
-
-    time.sleep(3)
-
     # Получить и сохранить историю торгов для всех облигаций во всех режимах торгов за последнюю дату
     bonds_history1 = BondsHistory()
     asyncio.run(bonds_history1.load_data_from_internet_async())
     bonds_history1.store_data_to_db()
+
+    time.sleep(3)
+
+    # Получить и сохранить историю торгов для всех акций во всех режимах торгов (сейчас TQBR) за последнюю дату
+    shares_history1 = SharesHistory()
+    asyncio.run(shares_history1.load_data_from_internet_async())
+    shares_history1.store_data_to_db()
 
     time.sleep(3)
 

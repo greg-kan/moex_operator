@@ -89,7 +89,8 @@ create table main.shares_main_marketdata (
  etfsettlecurrency varchar(32),
  valtoday_rur bigint,
  tradingsession varchar(8),
- trendissuecapitalization numeric(19,6)
+ trendissuecapitalization numeric(19,6),
+ inserttimestamp timestamp DEFAULT current_timestamp
 );
 
 --truncate table main.shares_main_dataversion;
@@ -97,12 +98,14 @@ create table main.shares_main_marketdata (
 create table main.shares_main_dataversion (
 -- session_num serial,
  data_version integer,
- seqnum bigint
+ seqnum bigint,
+ inserttimestamp timestamp DEFAULT current_timestamp
 );
  
+
 --drop table reference.bonds_list_on_date;
 --truncate table reference.bonds_list_on_date;
-create table reference.bonds_list_on_date (
+create table main.bonds_main_securities (
  secid varchar(64),
  boardid varchar(32),
  shortname varchar(64),
@@ -145,6 +148,105 @@ create table reference.bonds_list_on_date (
  FACEVALUEONSETTLEDATE double precision,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
+
+
+		"SECID": {"type": "string", "bytes": 36, "max_size": 0},
+		"BID": {"type": "double"},
+		"BIDDEPTH": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"OFFER": {"type": "double"},
+		"OFFERDEPTH": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"SPREAD": {"type": "double"},
+		"BIDDEPTHT": {"type": "int32"},
+		"OFFERDEPTHT": {"type": "int32"},
+		"OPEN": {"type": "double"},
+		"LOW": {"type": "double"},
+		"HIGH": {"type": "double"},
+		"LAST": {"type": "double"},
+		"LASTCHANGE": {"type": "double"},
+		"LASTCHANGEPRCNT": {"type": "double"},
+		"QTY": {"type": "int32"},
+		"VALUE": {"type": "double"},
+		"YIELD": {"type": "double"},
+		"VALUE_USD": {"type": "double"},
+		"WAPRICE": {"type": "double"},
+		"LASTCNGTOLASTWAPRICE": {"type": "double"},
+		"WAPTOPREVWAPRICEPRCNT": {"type": "double"},
+		"WAPTOPREVWAPRICE": {"type": "double"},
+		"YIELDATWAPRICE": {"type": "double"},
+		"YIELDTOPREVYIELD": {"type": "double"},
+		"CLOSEYIELD": {"type": "double"},
+		"CLOSEPRICE": {"type": "double"},
+		"MARKETPRICETODAY": {"type": "double"},
+		"MARKETPRICE": {"type": "double"},
+		"LASTTOPREVPRICE": {"type": "double"},
+		"NUMTRADES": {"type": "int32"},
+		"VOLTODAY": {"type": "int64"},
+		"VALTODAY": {"type": "int64"},
+		"VALTODAY_USD": {"type": "int64"},
+		"BOARDID": {"type": "string", "bytes": 12, "max_size": 0},
+		"TRADINGSTATUS": {"type": "string", "bytes": 3, "max_size": 0},
+		"UPDATETIME": {"type": "time", "bytes": 10, "max_size": 0},
+		"DURATION": {"type": "double"},
+		"NUMBIDS": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"NUMOFFERS": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"CHANGE": {"type": "double"},
+		"TIME": {"type": "time", "bytes": 10, "max_size": 0},
+		"HIGHBID": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"LOWOFFER": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"PRICEMINUSPREVWAPRICE": {"type": "double"},
+		"LASTBID": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"LASTOFFER": {"type": "undefined", "bytes": 0, "max_size": 0},
+		"LCURRENTPRICE": {"type": "double"},
+		"LCLOSEPRICE": {"type": "double"},
+		"MARKETPRICE2": {"type": "double"},
+		"OPENPERIODPRICE": {"type": "double"},
+		"SEQNUM": {"type": "int64"},
+		"SYSTIME": {"type": "datetime", "bytes": 19, "max_size": 0},
+		"VALTODAY_RUR": {"type": "int64"},
+		"IRICPICLOSE": {"type": "double"},
+		"BEICLOSE": {"type": "double"},
+		"CBRCLOSE": {"type": "double"},
+		"YIELDTOOFFER": {"type": "double"},
+		"YIELDLASTCOUPON": {"type": "double"},
+		"TRADINGSESSION": {"type": "string", "bytes": 3, "max_size": 0}
+
+--truncate table main.bonds_main_dataversion;
+--drop table main.bonds_main_dataversion;
+create table main.bonds_main_dataversion (
+-- session_num serial,
+ data_version integer,
+ seqnum bigint,
+ inserttimestamp timestamp DEFAULT current_timestamp
+);		
+		
+
+"marketdata_yields": {
+	"metadata": {
+		"SECID": {"type": "string", "bytes": 36, "max_size": 0},
+		"BOARDID": {"type": "string", "bytes": 12, "max_size": 0},
+		"PRICE": {"type": "double"},
+		"YIELDDATE": {"type": "date", "bytes": 10, "max_size": 0},
+		"ZCYCMOMENT": {"type": "datetime", "bytes": 19, "max_size": 0},
+		"YIELDDATETYPE": {"type": "string", "bytes": 21, "max_size": 0},
+		"EFFECTIVEYIELD": {"type": "double"},
+		"DURATION": {"type": "int32"},
+		"ZSPREADBP": {"type": "int32"},
+		"GSPREADBP": {"type": "int32"},
+		"WAPRICE": {"type": "double"},
+		"EFFECTIVEYIELDWAPRICE": {"type": "double"},
+		"DURATIONWAPRICE": {"type": "int32"},
+		"IR": {"type": "double"},
+		"ICPI": {"type": "double"},
+		"BEI": {"type": "double"},
+		"CBR": {"type": "double"},
+		"YIELDTOOFFER": {"type": "double"},
+		"YIELDLASTCOUPON": {"type": "double"},
+		"TRADEMOMENT": {"type": "datetime", "bytes": 19, "max_size": 0},
+		"SEQNUM": {"type": "int64"},
+		"SYSTIME": {"type": "datetime", "bytes": 19, "max_size": 0}
+	},		
+
+select * from main.bonds_main_securities;
 
 https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json
 https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQCB/securities.json
