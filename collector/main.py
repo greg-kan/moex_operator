@@ -227,7 +227,7 @@ def routine():
     bonds_main1 = BondsMain(session_number)
     asyncio.run(bonds_main1.load_data_from_internet_async())
 
-    bonds_main1.store_data_to_db(bonds_main1.securities_data, 'securities')
+    bonds_main1.store_data_to_db('securities')
 
     time.sleep(3)
 
@@ -235,9 +235,9 @@ def routine():
     shares_main1 = SharesMain(session_number)
     asyncio.run(shares_main1.load_data_from_internet_async())
 
-    shares_main1.store_data_to_db(shares_main1.securities_data, 'securities')
-    shares_main1.store_data_to_db(shares_main1.marketdata_data, 'marketdata')
-    shares_main1.store_data_to_db(shares_main1.dataversion_data, 'dataversion')
+    shares_main1.store_data_to_db('securities')
+    shares_main1.store_data_to_db('marketdata')
+    shares_main1.store_data_to_db('dataversion')
 
     time.sleep(3)
 

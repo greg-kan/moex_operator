@@ -1,4 +1,5 @@
 --CREATE SCHEMA main;
+
 --drop table main.shares_main_securities;
 --truncate table main.shares_main_securities;
 create table main.shares_main_securities (
@@ -29,8 +30,10 @@ create table main.shares_main_securities (
  sectype varchar(10),
  listlevel integer,
  settledate date,
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
+
 
 --truncate table main.shares_main_marketdata;
 create table main.shares_main_marketdata (
@@ -90,15 +93,17 @@ create table main.shares_main_marketdata (
  valtoday_rur bigint,
  tradingsession varchar(8),
  trendissuecapitalization numeric(19,6),
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
+
 
 --truncate table main.shares_main_dataversion;
 --drop table main.shares_main_dataversion;
 create table main.shares_main_dataversion (
--- session_num serial,
  data_version integer,
  seqnum bigint,
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
  
