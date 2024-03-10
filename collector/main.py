@@ -256,14 +256,14 @@ def routine():
     time.sleep(3)
 
     # Получить и сохранить перечень облигаций
-    bonds_base1 = BondsBase()
+    bonds_base1 = BondsBase(session_number)
     asyncio.run(bonds_base1.load_data_from_internet_async())
     bonds_base1.store_data_to_db()
 
     time.sleep(3)
 
     # Получить и сохранить перечень акций
-    shares_base1 = SharesBase()
+    shares_base1 = SharesBase(session_number)
     asyncio.run(shares_base1.load_data_from_internet_async())
     shares_base1.store_data_to_db()
 

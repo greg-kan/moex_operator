@@ -2,7 +2,6 @@
  * shares_history
  */
 
-ALTER TABLE history.shares_history RENAME TO shares_history1;
 --truncate table history.shares_history; 
 create table history.shares_history (
  boardid varchar(32),
@@ -31,37 +30,6 @@ create table history.shares_history (
  sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
-
-insert into history.shares_history
-select
- boardid,
- tradedate,
- shortname,
- secid,
- numtrades,
- value,
- open,
- low,
- high,
- legalcloseprice,
- waprice,
- close,
- volume,
- marketprice2,
- marketprice3,
- admittedquote,
- mp2valtrd,
- marketprice3tradesvalue,
- admittedvalue,
- waval,
- tradingsession,
- currencyid,
- trendclspr,
- 0 as sess_num,
- inserttimestamp
-from history.shares_history1
-
-drop table history.shares_history1;
 
 create table history.shares_history_2023_2023
 (like history.shares_history INCLUDING all);
@@ -120,7 +88,6 @@ LANGUAGE plpgsql;
  * bonds_history
  */
 
-ALTER TABLE history.bonds_history RENAME TO bonds_history1;
 --truncate table history.bonds_history;
 create table history.bonds_history (
  boardid varchar(32),
@@ -164,53 +131,6 @@ create table history.bonds_history (
  sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
-
-
-insert into history.bonds_history
-select
- boardid,
- tradedate,
- shortname,
- secid,
- numtrades,
- value,
- low,
- high,
- close,
- legalcloseprice,
- ACCINT,
- waprice,
- YIELDCLOSE,
- open,
- volume,
- marketprice2,
- marketprice3,
- admittedquote,
- mp2valtrd,
- marketprice3tradesvalue,
- admittedvalue,
- MATDATE, ---- recreate with type date and fix tis dates "0000-00-00"
- DURATION,
- YIELDATWAP,
- IRICPICLOSE,
- BEICLOSE,
- COUPONPERCENT,
- COUPONVALUE,
- BUYBACKDATE, ---- recreate with type date and fix tis dates "0000-00-00"
- LASTTRADEDATE, ---- recreate with type date and fix tis dates "0000-00-00"
- facevalue,
- CURRENCYID,
- CBRCLOSE,
- YIELDTOOFFER,
- YIELDLASTCOUPON,
- OFFERDATE,
- FACEUNIT,
- TRADINGSESSION,
- 0 as sess_num,
- inserttimestamp
-from history.bonds_history1;
-
-drop table history.bonds_history1;
 
 
 CREATE OR REPLACE FUNCTION history.f_save_bonds_history(json_data json)

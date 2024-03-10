@@ -17,6 +17,7 @@ create table reference.bonds_base (
  "group" varchar(128),
  primary_boardid varchar(32),
  marketprice_boardid varchar(32),
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp,
  updatetimestamp timestamp
 );
@@ -28,6 +29,7 @@ DECLARE
   curr_timestamp timestamp := current_timestamp;
   row_cnt_new int := 0;
   row_cnt_modified int := 0;
+  new_session_num int := 0;
 begin
  
   create temporary table temp_bonds_base
@@ -42,18 +44,23 @@ begin
   as x("id" integer, "secid" varchar(64), "shortname" varchar(256), "regnumber" varchar(256), "name" varchar(1024),
        "isin" varchar(64), "is_traded" integer, "emitent_id" integer, "emitent_title" varchar(1024), "emitent_inn" varchar(32),
        "emitent_okpo" varchar(32), "gosreg" varchar(256), "type" varchar(128), "group" varchar(128), "primary_boardid" varchar(32),
-       "marketprice_boardid" varchar(32));  
+       "marketprice_boardid" varchar(32), sess_num integer);
  
+  select max(sess_num) into new_session_num
+    from temp_bonds_base;
+       
   insert into temp_bonds_base_modified (   
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
-         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
+         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid",
+         new_session_num as "sess_num"
     from temp_bonds_base tbb
    where tbb."secid" in (select "secid" from reference.bonds_base)
  
   except
 
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
-         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
+         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid",
+         new_session_num as "sess_num"
     from reference.bonds_base bb
    where bb."secid" in (select "secid" from temp_bonds_base)
      and bb.updatetimestamp is null
@@ -72,7 +79,8 @@ begin
 ---------part three
   insert into reference.bonds_base
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
-         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
+         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid",
+         "sess_num"
     from temp_bonds_base
    where "secid" not in (select "secid" from reference.bonds_base);  
     
@@ -109,6 +117,7 @@ create table reference.shares_base (
  "group" varchar(128),
  primary_boardid varchar(32),
  marketprice_boardid varchar(32),
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp,
  updatetimestamp timestamp
 );
@@ -121,6 +130,7 @@ DECLARE
   curr_timestamp timestamp := current_timestamp;
   row_cnt_new int := 0;
   row_cnt_modified int := 0;
+  new_session_num int := 0;
 begin
  
   create temporary table temp_shares_base
@@ -135,18 +145,23 @@ begin
   as x("id" integer, "secid" varchar(64), "shortname" varchar(256), "regnumber" varchar(256), "name" varchar(1024),
        "isin" varchar(64), "is_traded" integer, "emitent_id" integer, "emitent_title" varchar(1024), "emitent_inn" varchar(32),
        "emitent_okpo" varchar(32), "gosreg" varchar(256), "type" varchar(128), "group" varchar(128), "primary_boardid" varchar(32),
-       "marketprice_boardid" varchar(32));  
+       "marketprice_boardid" varchar(32), sess_num integer);  
  
+  select max(sess_num) into new_session_num
+    from temp_shares_base;      
+      
   insert into temp_shares_base_modified (   
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
-         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
+         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid",
+         new_session_num as "sess_num"
     from temp_shares_base tbb
    where tbb."secid" in (select "secid" from reference.shares_base)
  
   except
 
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
-         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
+         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid",
+         new_session_num as "sess_num"
     from reference.shares_base bb
    where bb."secid" in (select "secid" from temp_shares_base)
      and bb.updatetimestamp is null
@@ -165,7 +180,8 @@ begin
 ---------part three
   insert into reference.shares_base
   select "id", "secid", "shortname", "regnumber", "name", "isin", "is_traded", "emitent_id", "emitent_title",
-         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid"
+         "emitent_inn", "emitent_okpo", "gosreg", "type", "group", "primary_boardid", "marketprice_boardid",
+         "sess_num"
     from temp_shares_base
    where "secid" not in (select "secid" from reference.shares_base);  
     
