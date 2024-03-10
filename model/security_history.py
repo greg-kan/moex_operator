@@ -91,7 +91,7 @@ BONDS_HISTORY_METADATA = {
 
 
 class SecuritiesHistory:
-    def __init__(self):
+    def __init__(self, session_number):
         self.metadata: dict[list[dict[str, dict]]] | None = None
         self.data: list[dict] | None = None
         self.class_name = self.__class__.__name__
@@ -99,6 +99,7 @@ class SecuritiesHistory:
         self.db_table: str = ''
         self.stored_proc: str = ''
         self.db_table_columns: list[str] = []
+        self.session_number: int = session_number
 
     async def load_data_from_internet_async(self):
         # arguments = {'securities.columns': tuple(self.db_table_columns)}
@@ -117,7 +118,12 @@ class SecuritiesHistory:
             logger.info(f"{self.class_name}.store_data_to_db(): {len(self.data)} "
                         f"{self.class_name} records loaded from internet")
 
-            result = dbh.store_to_db_by_sp(self.data, self.db_table, self.stored_proc)
+            data: list[dict] = self.data
+
+            for record in data:
+                record['sess_num'] = self.session_number
+
+            result = dbh.store_to_db_by_sp(data, self.db_table, self.stored_proc)
 
             if result is None:
                 logger.error(f"{self.class_name}.store_data_to_db(): DB Error occurred. "
@@ -146,8 +152,8 @@ class SecuritiesHistory:
 
 
 class SharesHistory(SecuritiesHistory):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, session_number):
+        super().__init__(session_number)
         self.request_url: str = SHARES_HISTORY_REQUEST_URL
         self.db_table: str = SHARES_HISTORY_DB_TABLE
         self.stored_proc: str = SHARES_HISTORY_STORED_PROC
@@ -155,8 +161,8 @@ class SharesHistory(SecuritiesHistory):
 
 
 class BondsHistory(SecuritiesHistory):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, session_number):
+        super().__init__(session_number)
         self.request_url: str = BONDS_HISTORY_REQUEST_URL
         self.db_table: str = BONDS_HISTORY_DB_TABLE
         self.stored_proc: str = BONDS_HISTORY_STORED_PROC

@@ -2,6 +2,8 @@
  * shares_history
  */
 
+ALTER TABLE history.shares_history RENAME TO shares_history1;
+--truncate table history.shares_history; 
 create table history.shares_history (
  boardid varchar(32),
  tradedate date,
@@ -26,8 +28,40 @@ create table history.shares_history (
  tradingsession int4,
  currencyid varchar(16),
  trendclspr numeric(19,6),
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
+
+insert into history.shares_history
+select
+ boardid,
+ tradedate,
+ shortname,
+ secid,
+ numtrades,
+ value,
+ open,
+ low,
+ high,
+ legalcloseprice,
+ waprice,
+ close,
+ volume,
+ marketprice2,
+ marketprice3,
+ admittedquote,
+ mp2valtrd,
+ marketprice3tradesvalue,
+ admittedvalue,
+ waval,
+ tradingsession,
+ currencyid,
+ trendclspr,
+ 0 as sess_num,
+ inserttimestamp
+from history.shares_history1
+
+drop table history.shares_history1;
 
 create table history.shares_history_2023_2023
 (like history.shares_history INCLUDING all);
@@ -57,7 +91,7 @@ begin
        "waprice" numeric(19,6), "close" numeric(19,6), "volume" numeric(19,6), "marketprice2" numeric(19,6),
        "marketprice3" numeric(19,6), "admittedquote" numeric(19,6), "mp2valtrd" numeric(19,6), "marketprice3tradesvalue" numeric(19,6),
        "admittedvalue" numeric(19,6), "waval" numeric(19,6), "tradingsession" int4, "currencyid" varchar(16),
-       "trendclspr" numeric(19,6));
+       "trendclspr" numeric(19,6), "sess_num" integer);
       
   select max(tradedate) into curr_date
     from temp_shares_history;      
@@ -85,6 +119,9 @@ LANGUAGE plpgsql;
 /*
  * bonds_history
  */
+
+ALTER TABLE history.bonds_history RENAME TO bonds_history1;
+--truncate table history.bonds_history;
 create table history.bonds_history (
  boardid varchar(32),
  tradedate date,
@@ -124,8 +161,57 @@ create table history.bonds_history (
  OFFERDATE varchar(16),
  FACEUNIT varchar(16),
  TRADINGSESSION integer,
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
+
+
+insert into history.bonds_history
+select
+ boardid,
+ tradedate,
+ shortname,
+ secid,
+ numtrades,
+ value,
+ low,
+ high,
+ close,
+ legalcloseprice,
+ ACCINT,
+ waprice,
+ YIELDCLOSE,
+ open,
+ volume,
+ marketprice2,
+ marketprice3,
+ admittedquote,
+ mp2valtrd,
+ marketprice3tradesvalue,
+ admittedvalue,
+ MATDATE, ---- recreate with type date and fix tis dates "0000-00-00"
+ DURATION,
+ YIELDATWAP,
+ IRICPICLOSE,
+ BEICLOSE,
+ COUPONPERCENT,
+ COUPONVALUE,
+ BUYBACKDATE, ---- recreate with type date and fix tis dates "0000-00-00"
+ LASTTRADEDATE, ---- recreate with type date and fix tis dates "0000-00-00"
+ facevalue,
+ CURRENCYID,
+ CBRCLOSE,
+ YIELDTOOFFER,
+ YIELDLASTCOUPON,
+ OFFERDATE,
+ FACEUNIT,
+ TRADINGSESSION,
+ 0 as sess_num,
+ inserttimestamp
+from history.bonds_history1;
+
+drop table history.bonds_history1;
+
 
 CREATE OR REPLACE FUNCTION history.f_save_bonds_history(json_data json)
 RETURNS int
@@ -150,7 +236,7 @@ begin
        "couponpercent" numeric(19,6), "couponvalue" numeric(19,6), "buybackdate" varchar(16), ---- recreate with type date and fix tis dates "0000-00-00"
        "lasttradedate" varchar(16), ---- recreate with type date and fix tis dates "0000-00-00"
        "facevalue" double precision, "currencyid" varchar(16), "cbrclose" double precision, "yieldtooffer" double precision,
-       "yieldlastcoupon" double precision, "offerdate" varchar(16), "faceunit" varchar(16), "tradingsession" integer);
+       "yieldlastcoupon" double precision, "offerdate" varchar(16), "faceunit" varchar(16), "tradingsession" integer, "sess_num" integer);
       
   select max(tradedate) into curr_date
     from temp_bonds_history;      
