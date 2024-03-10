@@ -137,6 +137,10 @@ class BondsMain:
             data = self.marketdata_yields_data
 
         if len(data) > 0:
+
+            for record in data:
+                record['sess_num'] = self.session_number
+
             logger.info(f"{self.class_name}.store_data_to_db: Length of the {str_data}_data = "
                         f"{len(data)}")
 

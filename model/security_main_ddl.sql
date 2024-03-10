@@ -151,6 +151,7 @@ create table main.bonds_main_securities (
  settledate date,
  LOTVALUE double precision,
  FACEVALUEONSETTLEDATE double precision,
+ sess_num integer,
  inserttimestamp timestamp DEFAULT current_timestamp
 );
 
