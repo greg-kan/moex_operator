@@ -213,9 +213,10 @@ def test_request_by_client(group: str, limit: str, start: str):
 def routine():
     logger.info("Routine started")
 
-    # Инициировать сессию и получить session_number
+    # Инициировать сессию и получить session_number и session_time
     session = Session()
     session_number = session.get_number()
+    session_time = session.get_time()
 
     if session_number == 0:
         logger.error("Session was not initialized")
@@ -223,49 +224,52 @@ def routine():
 
     time.sleep(3)
 
-    # Получить и сохранить основные данные по облигациям
-    bonds_main1 = BondsMain(session_number)
-    asyncio.run(bonds_main1.load_data_from_internet_async())
-
-    bonds_main1.store_data_to_db('securities')
-
-    time.sleep(3)
-
     # Получить и сохранить основные данные по акциям
     shares_main1 = SharesMain(session_number)
     asyncio.run(shares_main1.load_data_from_internet_async())
 
-    shares_main1.store_data_to_db('securities')
     shares_main1.store_data_to_db('marketdata')
-    shares_main1.store_data_to_db('dataversion')
 
-    time.sleep(3)
+    if session_time.hour in [10, 16]:
 
-    # Получить и сохранить историю торгов для всех облигаций во всех режимах торгов за последнюю дату
-    bonds_history1 = BondsHistory(session_number)
-    asyncio.run(bonds_history1.load_data_from_internet_async())
-    bonds_history1.store_data_to_db()
+        shares_main1.store_data_to_db('securities')
+        shares_main1.store_data_to_db('dataversion')
 
-    time.sleep(3)
+        time.sleep(3)
 
-    # Получить и сохранить историю торгов для всех акций в режиме торгов TQBR за последнюю дату
-    shares_history1 = SharesHistory(session_number)
-    asyncio.run(shares_history1.load_data_from_internet_async())
-    shares_history1.store_data_to_db()
+        # Получить и сохранить основные данные по облигациям
+        bonds_main1 = BondsMain(session_number)
+        asyncio.run(bonds_main1.load_data_from_internet_async())
 
-    time.sleep(3)
+        bonds_main1.store_data_to_db('securities')
 
-    # Получить и сохранить перечень облигаций
-    bonds_base1 = BondsBase(session_number)
-    asyncio.run(bonds_base1.load_data_from_internet_async())
-    bonds_base1.store_data_to_db()
+        time.sleep(3)
 
-    time.sleep(3)
+        # Получить и сохранить историю торгов для всех облигаций во всех режимах торгов за последнюю дату
+        bonds_history1 = BondsHistory(session_number)
+        asyncio.run(bonds_history1.load_data_from_internet_async())
+        bonds_history1.store_data_to_db()
 
-    # Получить и сохранить перечень акций
-    shares_base1 = SharesBase(session_number)
-    asyncio.run(shares_base1.load_data_from_internet_async())
-    shares_base1.store_data_to_db()
+        time.sleep(3)
+
+        # Получить и сохранить историю торгов для всех акций в режиме торгов TQBR за последнюю дату
+        shares_history1 = SharesHistory(session_number)
+        asyncio.run(shares_history1.load_data_from_internet_async())
+        shares_history1.store_data_to_db()
+
+        time.sleep(3)
+
+        # Получить и сохранить перечень облигаций
+        bonds_base1 = BondsBase(session_number)
+        asyncio.run(bonds_base1.load_data_from_internet_async())
+        bonds_base1.store_data_to_db()
+
+        time.sleep(3)
+
+        # Получить и сохранить перечень акций
+        shares_base1 = SharesBase(session_number)
+        asyncio.run(shares_base1.load_data_from_internet_async())
+        shares_base1.store_data_to_db()
 
     logger.info("Routine finished")
 

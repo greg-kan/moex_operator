@@ -2,6 +2,7 @@
  * shares_history
  */
 
+drop table history.shares_history;
 --truncate table history.shares_history; 
 create table history.shares_history (
  boardid varchar(32),
@@ -88,6 +89,7 @@ LANGUAGE plpgsql;
  * bonds_history
  */
 
+--drop table history.bonds_history;
 --truncate table history.bonds_history;
 create table history.bonds_history (
  boardid varchar(32),

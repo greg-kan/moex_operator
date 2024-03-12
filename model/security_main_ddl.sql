@@ -34,7 +34,7 @@ create table main.shares_main_securities (
  inserttimestamp timestamp DEFAULT current_timestamp
 );
 
-
+--drop table main.shares_main_marketdata;
 --truncate table main.shares_main_marketdata;
 create table main.shares_main_marketdata (
  secid varchar(64),
@@ -108,8 +108,8 @@ create table main.shares_main_dataversion (
 );
  
 
---drop table reference.bonds_list_on_date;
---truncate table reference.bonds_list_on_date;
+--drop table main.bonds_main_securities;
+--truncate table main.bonds_main_securities;
 create table main.bonds_main_securities (
  secid varchar(64),
  boardid varchar(32),
