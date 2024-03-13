@@ -230,16 +230,18 @@ def routine():
 
     shares_main1.store_data_to_db('marketdata')
 
+    time.sleep(3)
+
+    # Получить и сохранить основные данные по облигациям
+    bonds_main1 = BondsMain(session_number)
+    asyncio.run(bonds_main1.load_data_from_internet_async())
+
+    bonds_main1.store_data_to_db('marketdata')
+
     if session_time.hour in [10, 16]:
 
         shares_main1.store_data_to_db('securities')
         shares_main1.store_data_to_db('dataversion')
-
-        time.sleep(3)
-
-        # Получить и сохранить основные данные по облигациям
-        bonds_main1 = BondsMain(session_number)
-        asyncio.run(bonds_main1.load_data_from_internet_async())
 
         bonds_main1.store_data_to_db('securities')
 
