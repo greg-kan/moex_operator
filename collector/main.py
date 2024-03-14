@@ -237,6 +237,7 @@ def routine():
     asyncio.run(bonds_main1.load_data_from_internet_async())
 
     bonds_main1.store_data_to_db('marketdata')
+    bonds_main1.store_data_to_db('marketdata_yields')
 
     if session_time.hour in [10, 16]:
 
@@ -244,6 +245,7 @@ def routine():
         shares_main1.store_data_to_db('dataversion')
 
         bonds_main1.store_data_to_db('securities')
+        bonds_main1.store_data_to_db('dataversion')
 
         time.sleep(3)
 

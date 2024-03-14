@@ -232,42 +232,30 @@ create table main.bonds_main_dataversion (
  inserttimestamp timestamp DEFAULT current_timestamp
 );		
 		
+create table main.bonds_main_marketdata_yields (
+ secid varchar(64),
+ boardid varchar(32),
+ price numeric(19,6),
+ yielddate date,
+ zcycmoment timestamp,
+ yielddatetype varchar(32),
+ effectiveyield numeric(19,6),
+ duration integer,
+ zspreadbp integer,
+ gspreadbp integer,
+ waprice numeric(19,6),
+ effectiveyieldwaprice numeric(19,6),
+ durationwaprice integer,
+ ir numeric(19,6),
+ icpi numeric(19,6),
+ bei numeric(19,6),
+ cbr numeric(19,6),
+ yieldtooffer numeric(19,6),
+ yieldlastcoupon numeric(19,6),
+ trademoment timestamp,
+ seqnum bigint,
+ systime timestamp,
+ sess_num integer,
+ inserttimestamp timestamp DEFAULT current_timestamp 
+);		
 
-"marketdata_yields": {
-	"metadata": {
-		"SECID": {"type": "string", "bytes": 36, "max_size": 0},
-		"BOARDID": {"type": "string", "bytes": 12, "max_size": 0},
-		"PRICE": {"type": "double"},
-		"YIELDDATE": {"type": "date", "bytes": 10, "max_size": 0},
-		"ZCYCMOMENT": {"type": "datetime", "bytes": 19, "max_size": 0},
-		"YIELDDATETYPE": {"type": "string", "bytes": 21, "max_size": 0},
-		"EFFECTIVEYIELD": {"type": "double"},
-		"DURATION": {"type": "int32"},
-		"ZSPREADBP": {"type": "int32"},
-		"GSPREADBP": {"type": "int32"},
-		"WAPRICE": {"type": "double"},
-		"EFFECTIVEYIELDWAPRICE": {"type": "double"},
-		"DURATIONWAPRICE": {"type": "int32"},
-		"IR": {"type": "double"},
-		"ICPI": {"type": "double"},
-		"BEI": {"type": "double"},
-		"CBR": {"type": "double"},
-		"YIELDTOOFFER": {"type": "double"},
-		"YIELDLASTCOUPON": {"type": "double"},
-		"TRADEMOMENT": {"type": "datetime", "bytes": 19, "max_size": 0},
-		"SEQNUM": {"type": "int64"},
-		"SYSTIME": {"type": "datetime", "bytes": 19, "max_size": 0}
-	},		
-
-select * from main.bonds_main_securities;
-
-https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQOB/securities.json
-https://iss.moex.com/iss/engines/stock/markets/bonds/boards/TQCB/securities.json
-select distinct primary_boardid from reference.bonds_base;
-select distinct marketprice_boardid from reference.bonds_base;
-
-primary_boardid
-marketprice_boardid
-
-select * from history.shares_list_on_date
-  where secid  = 'SBER';
