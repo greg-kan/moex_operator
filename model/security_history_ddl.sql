@@ -1,8 +1,7 @@
-/*
- * shares_history
- */
+create schema history;
 
-drop table history.shares_history;
+
+--drop table history.shares_history;
 --truncate table history.shares_history; 
 create table history.shares_history (
  boardid varchar(32),
